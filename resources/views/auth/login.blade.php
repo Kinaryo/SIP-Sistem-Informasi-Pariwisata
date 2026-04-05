@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login | jelajahi.my.id</title>
-    <link rel="icon" type="image/png" href="{{ asset('jelajahimyid.png') }}">
+    <title>Login | LokaTRIP</title>
+    <link rel="icon" type="image/png" href="{{ asset('vaficon.jpeg') }}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 

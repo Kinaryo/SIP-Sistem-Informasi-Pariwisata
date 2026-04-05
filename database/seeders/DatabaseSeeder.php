@@ -30,6 +30,9 @@ class DatabaseSeeder extends Seeder
             QuizSeeder::class,
             SettingSeeder::class,
             SiteAccessCountSeeder::class,
+            ProdukSeeder::class,
+            ArtikelSeeder::class,
+            // TokoSeeder::class,
         ]);
     }
 }

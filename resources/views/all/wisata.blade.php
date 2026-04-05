@@ -5,9 +5,10 @@
 @section('content')
     <section id="destinasi" class="py-5 bg-white">
         <div class="container">
+            <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5">
 
             <div class="text-center mb-5">
-                <h2 class="fw-bold display-6 text-dark">Destinasi Wisata Unggulan</h2>
+                <h2 class="fw-bold display-6 text-dark">Destinasi Wisata</h2>
                 <div class="mx-auto my-3" style="width:80px;height:4px;background:#0d6efd;"></div>
                 <p class="text-muted">
                     Jelajahi destinasi terbaik Indonesia dari alam hingga budaya
@@ -87,5 +88,6 @@
                 @endforelse
             </div>
         </div>
+    </div>
     </section>
 @endsection

@@ -82,7 +82,7 @@
     <div class="container py-5">
 
         {{-- HERO --}}
-        <div class="hero-cover shadow mb-4">
+        <div class="hero-cover shadow mb-4  ">
             @if ($tourism_place->cover_image)
                 @php
                     $coverImg = Str::startsWith($tourism_place->cover_image, ['http://', 'https://'])
@@ -210,6 +210,7 @@
                         </div>
                     </div>
 
+                    
                     {{-- MAP --}}
                     @if ($tourism_place->location && $tourism_place->location->latitude)
                         <div class="card border-0 shadow rounded-4">

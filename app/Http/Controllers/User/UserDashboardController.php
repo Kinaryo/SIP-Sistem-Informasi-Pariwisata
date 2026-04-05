@@ -25,19 +25,38 @@ use Cloudinary\Configuration\Configuration;
 
 class UserDashboardController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::user();
-        Log::info("User {$user->id} membuka dashboard.");
+   public function index()
+{
+    $user = Auth::user();
 
-        $tourismPlaces = TourismPlace::where('user_id', $user->id)
-            ->orderByDesc('created_at')
-            ->get();
+    Log::info("User {$user->id} membuka dashboard.");
 
-        Log::info("User {$user->id} melihat {$tourismPlaces->count()} tempat wisata.");
+    // 🌍 Wisata
+    $tourismPlaces = $user->tourismPlaces()->latest()->get();
 
-        return view('dashboard.index', compact('user', 'tourismPlaces'));
-    }
+    // 🛍️ Produk
+    $produks = $user->produks()->latest()->get();
+
+    // 📰 Artikel
+    $artikels = $user->artikels()->latest()->get();
+
+    // 🏬 Toko
+    $tokoExists = $user->toko()->exists(); // true jika user punya toko
+
+    Log::info("User {$user->id} melihat:");
+    Log::info("- {$tourismPlaces->count()} wisata");
+    Log::info("- {$produks->count()} produk");
+    Log::info("- {$artikels->count()} artikel");
+    Log::info("- Toko ada? " . ($tokoExists ? 'ya' : 'tidak'));
+
+    return view('dashboard.index', compact(
+        'user',
+        'tourismPlaces',
+        'produks',
+        'artikels',
+        'tokoExists'
+    ));
+}
 
     public function createTourismPlaces()
     {

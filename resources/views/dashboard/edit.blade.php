@@ -13,40 +13,35 @@
 @endphp
 
 <style>
-    /* HERO */
-    .hero-cover { 
-        max-height: 500px; /* dikurangi dari 250px */
-        position: relative; 
-        overflow: hidden; 
-        border-radius: 1.25rem; 
-    }
-    .hero-cover img { width: 100%; height: 100%; object-fit: cover; }
-    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.7), transparent); }
-    .hero-content { position: absolute; bottom: 15px; left: 15px; color: #fff; }
+/* HERO */
+.hero-cover { max-height: 500px; position: relative; overflow: hidden; border-radius: 1.25rem; }
+.hero-cover img { width: 100%; height: 100%; object-fit: cover; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.7), transparent); }
+.hero-content { position: absolute; bottom: 15px; left: 15px; color: #fff; }
 
-    /* STICKY SIDEBAR */
-    .sticky-card { top: 90px; }
-    @media (min-width: 992px) { .sticky-card { position: sticky; } }
+/* STICKY SIDEBAR */
+.sticky-card { top: 90px; }
+@media (min-width: 992px) { .sticky-card { position: sticky; } }
 
-    /* GALERI */
-    .gallery-img { height: 180px; object-fit: cover; transition: transform .3s; cursor: pointer; }
-    .gallery-img:hover { transform: scale(1.05); }
+/* GALERI */
+.gallery-img { height: 180px; object-fit: cover; transition: transform .3s; cursor: pointer; }
+.gallery-img:hover { transform: scale(1.05); }
 
-    /* FASILITAS */
-    .facility-icon { width: 48px; height: 48px; background: #e7f1ff; color: #0d6efd; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: .5rem; font-size: 20px; }
+/* FASILITAS */
+.facility-icon { width: 48px; height: 48px; background: #e7f1ff; color: #0d6efd; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: .5rem; font-size: 20px; }
 
-    /* BORDER DASHED */
-    .border-dashed { border: 2px dashed #ced4da !important; }
+/* BORDER DASHED */
+.border-dashed { border: 2px dashed #ced4da !important; }
 
-    /* MAP */
-    #map { z-index: 1; }
+/* MAP */
+#map { z-index: 1; }
 
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-        .hero-content { bottom: 10px; left: 10px; }
-        .hero-cover { min-height: 150px; } /* dikurangi untuk mobile */
-        .gallery-img { height: 140px; }
-    }
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .hero-content { bottom: 10px; left: 10px; }
+    .hero-cover { min-height: 150px; }
+    .gallery-img { height: 140px; }
+}
 </style>
 
 <div class="container-fluid py-4 px-3 mt-3 px-md-5">
@@ -244,98 +239,96 @@
 </form>
 @endsection
 
-
-
 @push('scripts')
-    {{-- Leaflet Maps CSS & JS --}}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ===== Inisialisasi Map =====
+document.addEventListener('DOMContentLoaded', function () {
+    @if ($tourism_place->location && $tourism_place->location->latitude && $tourism_place->location->longitude)
+        const lat = {{ $tourism_place->location->latitude }};
+        const lng = {{ $tourism_place->location->longitude }};
+        const map = L.map('map').setView([lat, lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.marker([lat, lng]).addTo(map).bindPopup("{{ $tourism_place->name }}").openPopup();
+    @endif
+});
 
-    <script>
-        // Inisialisasi Map
-        document.addEventListener('DOMContentLoaded', function () {
-            @if ($tourism_place->location && $tourism_place->location->latitude && $tourism_place->location->longitude)
-                const lat = {{ $tourism_place->location->latitude }};
-                const lng = {{ $tourism_place->location->longitude }};
-                const map = L.map('map').setView([lat, lng], 15);
+// ===== Gallery & Delete =====
+function openAddGallery(id) {
+    document.getElementById('addGalleryForm').action = `/dashboard/gallery/${id}/store`;
+    new bootstrap.Modal('#addGalleryModal').show();
+}
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
+function openEditGallery(id, title) {
+    document.getElementById('editGalleryForm').action = `/dashboard/gallery/${id}`;
+    document.getElementById('editTitle').value = title;
+    new bootstrap.Modal('#editGalleryModal').show();
+}
 
-                L.marker([lat, lng]).addTo(map)
-                    .bindPopup("{{ $tourism_place->name }}")
-                    .openPopup();
-            @endif
-                                            });
-
-        // Script Gallery & Delete
-        function openAddGallery(id) {
-            document.getElementById('addGalleryForm').action = `/dashboard/gallery/${id}/store`;
-            new bootstrap.Modal('#addGalleryModal').show();
-        }
-
-        function openEditGallery(id, title) {
-            document.getElementById('editGalleryForm').action = `/dashboard/gallery/${id}`;
-            document.getElementById('editTitle').value = title;
-            new bootstrap.Modal('#editGalleryModal').show();
-        }
-
-        function confirmDelete(id) {
+function confirmDelete(id) {
+    Swal.fire({
+        title: 'Hapus foto?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!'
+    }).then(r => {
+        if (r.isConfirmed) {
+            const f = document.getElementById('deleteGalleryForm');
+            // Loading sebelum submit
             Swal.fire({
-                title: 'Hapus foto?',
-                text: "Data yang dihapus tidak dapat dikembalikan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Hapus!'
-            }).then(r => {
-                if (r.isConfirmed) {
-                    let f = document.getElementById('deleteGalleryForm');
-                    f.action = `/dashboard/gallery/${id}`;
-                    f.submit();
-                }
+                title: 'Menghapus...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
             });
+            f.action = `/dashboard/gallery/${id}`;
+            f.submit();
         }
+    });
+}
 
-        @if (session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: '{{ session('success') }}',
-                timer: 3000,
-                showConfirmButton: false
-            });
-        @endif
-    </script>
+// ===== SweetAlert sukses =====
+@if (session('success'))
+Swal.fire({
+    icon: 'success',
+    title: 'Berhasil',
+    text: '{{ session('success') }}',
+    timer: 3000,
+    showConfirmButton: false
+});
+@endif
 
+// ===== Loading saat submit form (semua modal edit) =====
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e){
+        Swal.fire({
+            title: 'Sedang mengirim data...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+    });
+});
+</script>
 
-    <script>
-        let editMap, marker;
-
-        document.getElementById('editLocationModal')
-            .addEventListener('shown.bs.modal', function () {
-
-                const lat = parseFloat(document.getElementById('latInput').value);
-                const lng = parseFloat(document.getElementById('lngInput').value);
-
-                editMap = L.map('editMap').setView([lat, lng], 15);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-                    .addTo(editMap);
-
-                marker = L.marker([lat, lng], { draggable: true }).addTo(editMap);
-
-                marker.on('dragend', function (e) {
-                    const pos = e.target.getLatLng();
-                    document.getElementById('latInput').value = pos.lat;
-                    document.getElementById('lngInput').value = pos.lng;
-                });
-            });
-
-    </script>
+<script>
+let editMap, marker;
+document.getElementById('editLocationModal')?.addEventListener('shown.bs.modal', function () {
+    const lat = parseFloat(document.getElementById('latInput').value);
+    const lng = parseFloat(document.getElementById('lngInput').value);
+    editMap = L.map('editMap').setView([lat, lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(editMap);
+    marker = L.marker([lat, lng], { draggable: true }).addTo(editMap);
+    marker.on('dragend', function (e) {
+        const pos = e.target.getLatLng();
+        document.getElementById('latInput').value = pos.lat;
+        document.getElementById('lngInput').value = pos.lng;
+    });
+});
+</script>
 @endpush

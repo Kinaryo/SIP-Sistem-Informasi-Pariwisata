@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="container py-5">
-        <h2 class="fw-bold mb-5 text-center">Quiz Interaktif</h2>
+        <h2 class="fw-bold mb-5 text-center">Quiz</h2>
 
         <div class="row g-4">
             @forelse($quizzes as $quiz)

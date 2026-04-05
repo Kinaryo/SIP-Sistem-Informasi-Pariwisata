@@ -5,9 +5,10 @@
 @section('content')
 
     <!-- ================= HERO ================= -->
-    <section id="home" class="hero-section d-flex align-items-center text-white text-center" style="min-height:100vh;
-                    background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
-                                url('{{ asset('hero.png') }}') center/cover no-repeat;">
+    <section id="home" class="hero-section d-flex align-items-center text-white text-center"
+        style="min-height:100vh;
+                                                            background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
+                                                                        url('{{ asset('hero.png') }}') center/cover no-repeat;">
         <div class="container">
             <h1 class="display-4 fw-bold mb-4">
                 Temukan Keajaiban Indonesia
@@ -15,7 +16,7 @@
             <p class="lead mb-5">
                 Sistem informasi pariwisata untuk menjelajahi keindahan nusantara.
             </p>
-            <a href="#destinasi" class="btn btn-primary btn-lg rounded-pill px-5">
+            <a href="/wisata" class="btn btn-primary btn-lg rounded-pill px-5">
                 Mulai Jelajah
             </a>
         </div>
@@ -59,7 +60,7 @@
 
             <div class="row align-items-center g-4">
                 <div class="col-md-6">
-                    <h5 class="fw-semibold mb-3">Pesona Wisata Indonesia</h5>
+                    <h5 class="fw-semibold mb-3">Tempat Terbaik</h5>
                     <p class="text-muted">
                         Kami adalah platform sistem informasi pariwisata yang bertujuan untuk
                         memperkenalkan keindahan alam, budaya, dan destinasi unggulan Indonesia,
@@ -92,7 +93,7 @@
         <div class="container">
 
             <div class="text-center mb-5">
-                <h2 class="fw-bold display-6 text-dark">Destinasi Wisata Unggulan</h2>
+                <h2 class="fw-bold display-6 text-dark">Destinasi Wisata</h2>
                 <div class="mx-auto my-3" style="width:80px;height:4px;background:#0d6efd;"></div>
                 <p class="text-muted">
                     Jelajahi destinasi terbaik Indonesia dari alam hingga budaya
@@ -140,6 +141,170 @@
         </div>
     </section>
 
+    <!-- ================= PRODUK================= -->
+    <section class="py-5 bg-light">
+        <div class="container">
+
+            <div class="text-center mb-5">
+                <h2 class="fw-bold display-6 text-dark">Produk</h2>
+                <div class="mx-auto my-3" style="width:80px;height:4px;background:#0d6efd;"></div>
+                <p class="text-muted">
+                    Jelajahi Produk Daerah Indonesia Timur
+                </p>
+            </div>
+
+            <div class="row g-4">
+                @forelse($produks as $p)
+                        @php
+                            $nama = \Illuminate\Support\Str::limit($p->nama_produk, 40);
+                            $toko = $p->user->toko ?? null;
+                        @endphp
+
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 card-hover">
+
+                                <!-- Gambar -->
+                                <a href="{{ route('produk.show', $p->id) }}">
+                                    <img src="{{ $p->foto
+                    ? (Str::startsWith($p->foto, 'http')
+                        ? $p->foto
+                        : asset('storage/' . $p->foto))
+                    : asset('no-image.png') }}" class="w-100 rounded-top-4" style="height:200px; object-fit:cover;">
+                                </a>
+
+                                <div class="card-body d-flex flex-column">
+
+                                    <!-- Nama -->
+                                    <h6 class="fw-bold title-limit">
+                                        <a href="{{ route('produk.show', $p->id) }}" class="text-dark text-decoration-none">
+                                            {{ $nama }}
+                                        </a>
+                                    </h6>
+
+                                    <!-- Harga -->
+                                    <span class="text-primary fw-bold mb-2">
+                                        Rp {{ number_format($p->harga, 0, ',', '.') }}
+                                    </span>
+
+                                    <!-- Toko -->
+                                    <small class="text-muted mb-3">
+                                        {{ $toko->nama_toko ?? 'UMKM Lokal' }}
+                                    </small>
+
+                                    <!-- Tombol -->
+                                    <div class="mt-auto d-flex gap-2">
+                                        <a href="{{ route('produk.show', $p->id) }}" class="btn btn-light btn-sm w-100">
+                                            Detail
+                                        </a>
+
+                                        @php
+                                            $toko = $p->user->toko ?? null;
+                                            $waAktif = $toko && $toko->telepon && $toko->telepon_aktif;
+                                        @endphp
+
+                                        <div class="mt-auto d-flex gap-2">
+                                            @if ($waAktif)
+                                                <span data-bs-toggle="tooltip" data-bs-title="Hubungi penjual sekarang">
+                                                    <a href="https://wa.me/{{ $toko->telepon }}" target="_blank"
+                                                        class="btn btn-success btn-sm">
+                                                        <i class="bi bi-whatsapp"></i>
+                                                    </a>
+                                                </span>
+                                            @else
+                                                <span data-bs-toggle="tooltip" data-bs-title="WhatsApp tidak tersedia / Toko tutup">
+                                                    <button class="btn btn-light btn-sm text-muted border" disabled>
+                                                        <i class="bi bi-whatsapp"></i>
+                                                    </button>
+                                                </span>
+                                            @endif
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                @empty
+                    <p class="text-muted text-center">Belum ada produk.</p>
+                @endforelse
+                <a href="{{ route('produk.index') }}" class="text-primary fw-semibold">
+                    Lihat Semua →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= ARTIKEL ================= -->
+    <section class="py-5 bg-white">
+        <div class="container">
+
+
+            <div class="text-center mb-5">
+                <h2 class="fw-bold display-6 text-dark">Artikel Terbaru</h2>
+                <div class="mx-auto my-3" style="width:80px;height:4px;background:#0d6efd;"></div>
+                <p class="text-muted">
+                    Jelajahi Artikel Kami
+                </p>
+            </div>
+
+            <div class="row g-4">
+                @forelse($artikels as $artikel)
+                    @php
+                        $isi = \Illuminate\Support\Str::limit(strip_tags($artikel->isi), 100);
+                    @endphp
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 card-hover">
+
+                            <!-- Gambar -->
+                            @if ($artikel->gambar)
+                                <img src="{{ asset('storage/' . $artikel->gambar) }}" class="w-100 rounded-top-4"
+                                    style="height:200px; object-fit:cover;">
+                            @else
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded-top-4"
+                                    style="height:200px;">
+                                    <small class="text-muted">No Image</small>
+                                </div>
+                            @endif
+
+                            <div class="card-body d-flex flex-column">
+
+                                <!-- Judul -->
+                                <h6 class="fw-bold title-limit">
+                                    {{ $artikel->judul }}
+                                </h6>
+
+                                <!-- Info -->
+                                <small class="text-muted mb-2">
+                                    {{ $artikel->user->name ?? 'Admin' }} •
+                                    {{ $artikel->created_at->format('d M Y') }}
+                                </small>
+
+                                <!-- Isi -->
+                                <p class="text-muted small flex-grow-1 text-limit">
+                                    {{ $isi }}
+                                </p>
+
+                                <!-- Tombol -->
+                                <a href="{{ route('artikel.show', $artikel->slug) }}"
+                                    class="btn btn-outline-primary btn-sm mt-2">
+                                    Baca →
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                @empty
+                    <p class="text-muted text-center">Belum ada artikel.</p>
+                @endforelse
+                <a href="{{ route('artikel.index') }}" class="text-primary fw-semibold">
+                    Lihat Semua →
+                </a>
+            </div>
+        </div>
+    </section>
     <!-- ================= KONTAK ================= -->
     <section id="kontak" class="py-5 bg-light">
         <div class="container">
@@ -206,4 +371,14 @@
         </div>
     </section>
 
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            tooltipTriggerList.map(function (el) {
+                return new bootstrap.Tooltip(el)
+            })
+        })
+    </script>
 @endsection

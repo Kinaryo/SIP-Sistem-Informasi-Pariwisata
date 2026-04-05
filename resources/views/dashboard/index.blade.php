@@ -3,109 +3,161 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <div class="container py-5">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">Dashboard</h2>
-            <p class="text-muted">Selamat datang di dashboard Anda! Berikut adalah langkah-langkah untuk menambahkan tempat
-                wisata di area Anda:</p>
-        </div>
 
-        <div class="row g-4">
-            {{-- Kolom Kanan: Daftar Tempat Wisata --}}
-            <div class="col-lg-9">
-                <div class="card shadow-sm rounded-4 p-4 h-100">
-                    <h5 class="fw-bold mb-3" style="font-size: 0.95rem; text-align: center;">Daftar Tempat Wisata Anda</h5>
+<style>
+    /* Header */
+    .dashboard-header h2 {
+        letter-spacing: 0.5px;
+    }
 
-                    @if(isset($tourismPlaces) && $tourismPlaces->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr style="font-size: 0.8rem">
-                                        <th>No</th>
-                                        <th>Nama Tempat</th>
-                                        <th>Kota/Kabupaten</th>
-                                        <th>Status</th>
-                                        <th>Tanggal Submit</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($tourismPlaces as $index => $place)
-                                        <tr style="font-size: 0.8rem">
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $place->name }}</td>
-                                            <td>{{ $place->location->city ?? '-' }}</td>
-                                            <td>
-                                                @if($place->is_verified && $place->is_active)
-                                                    <span class="badge bg-success text-white py-1 px-2 d-inline-block text-truncate"
-                                                        style="max-width: 120px;">
-                                                        Aktif
-                                                    </span>
-                                                @elseif($place->is_verified && !$place->is_active)
-                                                    <span class="badge bg-warning text-dark py-1 px-2 d-inline-block text-truncate"
-                                                        style="max-width: 120px;">
-                                                        Menunggu Aktivasi
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-secondary text-white py-1 px-2 d-inline-block text-truncate"
-                                                        style="max-width: 120px;">
-                                                        Menunggu Verifikasi
-                                                    </span>
-                                                @endif
-                                            </td>
+    /* ================= TAB ================= */
+    .dashboard-tab {
+        background: #f8f9fa;
+        padding: 6px;
+        border-radius: 50px;
+        display: flex;
+        flex-wrap: nowrap; /*  penting biar tidak turun */
+        width: 100%;
+        gap: 6px;
+    }
 
-                                            <td>{{ $place->created_at->format('d M Y H:i') }}</td>
-                                            <td>
-                                                <a href="{{ route('dashboard.showTourismPlaces', $place->slug) }}"
-                                                    class="btn btn-info btn-sm me-1" title="Lihat">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <a href="{{ route('dashboard.editTourismPlaces', $place->slug) }}"
-                                                    class="btn btn-warning btn-sm" title="Edit">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <p class="text-muted text-center">Anda belum menambahkan tempat wisata apapun.</p>
-                    @endif
-                </div>
-            </div>
-            {{-- Kolom Kiri: Alur Menambahkan Tempat Wisata --}}
-            <div class="col-lg-3">
-                <div class="card shadow-sm rounded-4 p-4 h-100">
-                    <h5 class="fw-bold mb-3" style="font-size: 0.95rem; text-align: center;">Alur Menambahkan Tempat Wisata
-                    </h5>
-                    <ol class="list-group list-group-numbered" style="font-size: 0.8rem">
-                        <li class="list-group-item">Login terlebih dahulu</li>
-                        <li class="list-group-item">Klik tombol <strong>"Tambah Tempat Wisata"</strong> di bawah ini.</li>
-                        <li class="list-group-item">Isi formulir dengan lengkap: nama tempat, deskripsi, kategori, alamat,
-                            foto, dan
-                            informasi lainnya.</li>
-                        <li class="list-group-item">Setelah selesai, klik <strong>"Simpan"</strong>. Tempat wisata akan
-                            masuk ke
-                            database dan menunggu approval admin (jika ada).</li>
-                        <li class="list-group-item">Tempat wisata yang berhasil ditambahkan akan muncul di daftar tempat
-                            wisata
-                            Anda.</li>
-                    </ol>
+    .dashboard-tab .nav-item {
+        flex: 1; /*  bagi rata 3 tab */
+    }
 
-                    <div class="mt-4 text-center">
-                        <a href="{{ route('dashboard.createTourismPlaces') }}" class="btn btn-primary rounded px-2 py-2"
-                            style="font-size: 0.8rem">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Tempat Wisata
-                        </a>
-                    </div>
-                </div>
-            </div>
+    .dashboard-tab .nav-link {
+        border-radius: 30px;
+        padding: 8px 6px;
+        font-size: 13px;
+        color: #555;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
 
+    .dashboard-tab .nav-link i {
+        font-size: 15px;
+    }
 
-        </div>
+    .dashboard-tab .nav-link:hover {
+        background: #e9ecef;
+        color: #000;
+    }
+
+    .dashboard-tab .nav-link.active {
+        background: #0d6efd;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(13,110,253,0.3);
+    }
+
+    /*  MOBILE OPTIMIZE */
+    @media (max-width: 576px) {
+        .dashboard-tab .nav-link {
+            flex-direction: column;
+            gap: 2px;
+            font-size: 11px;
+            padding: 6px 4px;
+        }
+
+        .dashboard-tab .nav-link i {
+            font-size: 14px;
+        }
+    }
+
+    /* Card container */
+    .dashboard-container {
+        background: #fff;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+</style>
+
+<div class="container py-5">
+
+    <!-- HEADER -->
+    <div class="text-center mb-4 dashboard-header">
+        <h2 class="fw-bold">Dashboard</h2>
+        <p class="text-muted">Kelola data wisata, produk, dan artikel Anda</p>
     </div>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- TAB MENU -->
+    <div class="mb-4">
+        <ul class="nav dashboard-tab w-100">
+
+            <li class="nav-item">
+                <a class="nav-link {{ request('tab') == 'wisata' || !request('tab') ? 'active' : '' }}"
+                   href="?tab=wisata">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>Wisata</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request('tab') == 'produk' ? 'active' : '' }}"
+                   href="?tab=produk">
+                    <i class="bi bi-bag"></i>
+                    <span>Produk</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request('tab') == 'artikel' ? 'active' : '' }}"
+                   href="?tab=artikel">
+                    <i class="bi bi-newspaper"></i>
+                    <span>Artikel</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="dashboard-container">
+
+        @if(request('tab') == 'produk')
+            @include('dashboard.partials.produk-index')
+
+        @elseif(request('tab') == 'artikel')
+            @include('dashboard.partials.artikel-index')
+
+        @else
+            @include('dashboard.partials.wisata-index')
+        @endif
+
+    </div>
+
+</div>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // ================= SUCCESS =================
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
+            timer: 2000,
+            showConfirmButton: false
+        });
+    @endif
+
+    // ================= ERROR =================
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: "{{ session('error') }}",
+        });
+    @endif
+</script>
+
 @endsection

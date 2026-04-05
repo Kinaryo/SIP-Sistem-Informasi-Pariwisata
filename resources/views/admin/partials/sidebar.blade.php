@@ -2,7 +2,7 @@
 
     <h5 class="text-white fw-bold mb-4">
         <i class="fas fa-map-marked-alt text-primary"></i>
-        JELAJAHI<span class="text-primary">.My.ID</span>
+        Lokasi<span class="text-primary">Terbaik</span>
     </h5>
 
     <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">

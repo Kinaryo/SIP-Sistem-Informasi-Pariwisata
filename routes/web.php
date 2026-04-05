@@ -12,6 +12,9 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuizQuestionController;
+use App\Http\Controllers\User\ArtikelController;
+use App\Http\Controllers\User\ProdukController;
+use App\Http\Controllers\User\TokoController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserQuizController;
 
@@ -65,12 +68,20 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ===== LANDING =====
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 Route::get('/tentang-kami', [LandingPageController::class, 'about'])->name('tentang.kami');
+
+Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
+
+Route::get('/artikel', [ArtikelController::class, 'index'])->name('artikel.index');
+Route::get('/artikel/{slug}', [ArtikelController::class, 'show'])->name('artikel.show');
+
 Route::get('/kontak-kami', [LandingPageController::class, 'contact'])->name('kontak.kami');
 Route::get('/wisata', [LandingPageController::class, 'wisata'])->name('wisata');
 Route::get('/wisata/{slug}', [LandingPageController::class, 'show'])->name('tourism-places.show');
 
 Route::post('/kontak/kirim', [ContactController::class, 'send'])->name('kontak.kirim');
-
+Route::view('/privacy-policy', 'all.partials.privacy')->name('privacy');
+Route::view('/terms', 'all.partials.terms')->name('terms');
 
 Route::prefix('quiz')->middleware('auth')->group(function () {
     Route::get('/', [UserQuizController::class, 'index'])->name('quiz.index');
@@ -79,6 +90,13 @@ Route::prefix('quiz')->middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'role:user'])->prefix('dashboard')->group(function () {
+    // Toko 
+    Route::get('/toko', [TokoController::class, 'index'])->name('toko.index');
+    Route::post('/toko', [TokoController::class, 'store'])->name('toko.store');
+    Route::get('/toko/{toko}/edit', [TokoController::class, 'edit'])->name('toko.edit');
+    Route::put('/toko/{toko}', [TokoController::class, 'update'])->name('toko.update');
+
+    
     Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/tambah-tempat-wisata-baru', [UserDashboardController::class, 'createTourismPlaces'])->name('dashboard.createTourismPlaces');
     Route::post('/tambah-tempat-wisata-baru', [UserDashboardController::class, 'storeTourismPlaces'])->name('dashboard.storeTourismPlaces');
@@ -124,6 +142,23 @@ Route::middleware(['auth', 'role:user'])->prefix('dashboard')->group(function ()
         ->name('dashboard.updateInfo');
 
     Route::put('/dashboard/wisata/{id}/location', [UserDashboardController::class, 'updateLocation'])->name('dashboard.updateLocation');
+
+
+    
+    // Produk
+    Route::get('/produk/create', [ProdukController::class, 'create'])->middleware('auth')->name('produk.create');
+    Route::post('/produk', [ProdukController::class, 'store'])->middleware('auth')->name('produk.store');
+    Route::get('/produk/{id}', [ProdukController::class, 'showByOwner'])->name('produk.showByOwner');
+    Route::get('/produk/{id}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
+    Route::put('/produk/{id}', [ProdukController::class, 'update'])->name('produk.update');
+    Route::delete('/produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
+    // Artikel
+    Route::get('/artikel/create', [ArtikelController::class, 'create'])->middleware('auth')->name('artikel.create');
+    Route::post('/artikel', [ArtikelController::class, 'store'])->middleware('auth')->name('artikel.store');
+    Route::get('/artikel/{id}/edit', [ArtikelController::class, 'edit'])->name('artikel.edit');
+    Route::put('/artikel/{id}', [ArtikelController::class, 'update'])->name('artikel.update');
+    Route::get('/artikel/{slug}', [ArtikelController::class, 'showByOwner'])->name('artikel.showByOwner');
+    Route::delete('/artikel/{id}', [ArtikelController::class, 'destroy'])->name('artikel.destroy');
 });
 
 

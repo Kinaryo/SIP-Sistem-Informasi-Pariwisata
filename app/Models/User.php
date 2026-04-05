@@ -24,6 +24,7 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
+
         'remember_token',
     ];
 
@@ -53,5 +54,20 @@ class User extends Authenticatable
     public function eventRegistrations()
     {
         return $this->hasMany(EventRegistration::class);
+    }
+
+    public function produks()
+    {
+        return $this->hasMany(Produk::class);
+    }
+
+    public function artikels()
+    {
+        return $this->hasMany(Artikel::class);
+    }
+
+    public function toko()
+    {
+        return $this->hasOne(Toko::class);
     }
 }

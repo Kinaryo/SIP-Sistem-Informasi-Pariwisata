@@ -18,11 +18,18 @@
     }
 </style>
 
+@php
+    $isDashboard = request()->is('dashboard*') || 
+                   request()->is('admin*') || 
+                   request()->routeIs('admin.*') || 
+                   request()->routeIs('dashboard*');
+@endphp
+
 <nav class="navbar navbar-expand-lg fixed-top navbar-blur shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold" href="/">
             <i class="fas fa-map-marked-alt text-primary me-1"></i>
-            JELAJAHI<span class="text-primary">.MY.ID</span>
+            Loka<span class="text-primary">TRIP</span>
         </a>
 
         <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
@@ -32,7 +39,6 @@
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav ms-auto align-items-center gap-2 fw-medium">
 
-                <!-- Public Menu -->
                 <li class="nav-item">
                     <a class="nav-link nav-pill {{ request()->is('/') ? 'active' : '' }}" href="/">
                         Beranda
@@ -40,9 +46,25 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link nav-pill {{ request()->routeIs('wisata') ? 'active' : '' }}"
+                    <a class="nav-link nav-pill {{ (request()->routeIs('wisata*') && !$isDashboard) ? 'active' : '' }}"
                         href="{{ route('wisata') }}">
                         Wisata
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link nav-pill 
+                        {{ (request()->routeIs('produk*') && !$isDashboard) ? 'active' : '' }}"
+                        href="{{ route('produk.index') }}">
+                        Produk
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link nav-pill 
+                        {{ (request()->routeIs('artikel*') && !$isDashboard) ? 'active' : '' }}"
+                        href="{{ route('artikel.index') }}">
+                        Artikel
                     </a>
                 </li>
 
@@ -60,15 +82,13 @@
                     </a>
                 </li>
 
-                <!-- Quiz -->
                 <li class="nav-item">
-                    <a class="nav-link nav-pill {{ request()->routeIs('quiz*') ? 'active' : '' }}"
+                    <a class="nav-link nav-pill {{ (request()->routeIs('quiz*') && !$isDashboard) ? 'active' : '' }}"
                         href="{{ route('quiz.index') }}">
                         Quiz
                     </a>
                 </li>
 
-                <!-- Guest -->
                 @guest
                     <li class="nav-item ms-2">
                         <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm nav-pill px-3">
@@ -77,7 +97,6 @@
                     </li>
                 @endguest
 
-                <!-- Auth -->
                 @auth
                     @php
                         $role = auth()->user()->role;
@@ -86,15 +105,13 @@
                             : route('dashboard');
                     @endphp
 
-                    <!-- Dashboard -->
                     <li class="nav-item">
-                        <a class="nav-link nav-pill {{ request()->routeIs('dashboard*') || request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                        <a class="nav-link nav-pill {{ $isDashboard ? 'active' : '' }}"
                             href="{{ $dashboardRoute }}">
                             Dashboard
                         </a>
                     </li>
 
-                    <!-- User Dropdown -->
                     <li class="nav-item dropdown ms-2">
                         <a class="btn btn-primary btn-sm nav-pill px-3 dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="fas fa-user me-1"></i>

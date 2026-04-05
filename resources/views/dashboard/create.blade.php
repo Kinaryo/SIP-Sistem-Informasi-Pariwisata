@@ -5,34 +5,33 @@
 
 @section('content')
 <div class="container py-5">
-    <div class="text-center">
-        <h2 class="fw-bold mb-3 text-center">Tambah Tempat Wisata</h2>
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Tambah Tempat Wisata</h2>
     </div>
 
     @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body">
             <form action="{{ route('dashboard.storeTourismPlaces') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-
                 <div class="row g-3">
 
-                    {{-- NAME --}}
+                    {{-- NAMA WISATA --}}
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Nama Wisata</label>
                         <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
                     </div>
 
-                    {{-- CATEGORY --}}
+                    {{-- KATEGORI --}}
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Kategori</label>
                         <select name="category_id" class="form-select" required>
@@ -45,7 +44,7 @@
                         </select>
                     </div>
 
-                    {{-- LOCATION --}}
+                    {{-- LOKASI --}}
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Provinsi</label>
                         <input type="text" name="province" class="form-control" value="{{ old('province') }}" required>
@@ -75,19 +74,19 @@
                         <input type="text" name="longitude" id="longitude" value="{{ old('longitude') }}" class="form-control mt-2" placeholder="Longitude" readonly>
                     </div>
 
-                    {{-- DESCRIPTION --}}
+                    {{-- DESKRIPSI --}}
                     <div class="col-12">
                         <label class="form-label fw-semibold">Deskripsi</label>
                         <textarea name="description" rows="4" class="form-control" required>{{ old('description') }}</textarea>
                     </div>
 
-                    {{-- PRICE --}}
+                    {{-- HARGA --}}
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Harga Tiket</label>
                         <input type="number" name="ticket_price" class="form-control" value="{{ old('ticket_price', 0) }}" min="0" required>
                     </div>
 
-                    {{-- OPEN / CLOSE TIME --}}
+                    {{-- JAM BUKA / TUTUP --}}
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Jam Buka</label>
                         <input type="time" name="open_time" class="form-control" value="{{ old('open_time') }}" required>
@@ -97,7 +96,7 @@
                         <input type="time" name="close_time" class="form-control" value="{{ old('close_time') }}" required>
                     </div>
 
-                    {{-- CONTACT --}}
+                    {{-- KONTAK --}}
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Kontak</label>
                         <input type="text" name="contact" class="form-control" value="{{ old('contact') }}">
@@ -109,7 +108,7 @@
                         <input type="file" name="cover_image" class="form-control" accept="image/*">
                     </div>
 
-                    {{-- FACILITIES --}}
+                    {{-- FASILITAS --}}
                     <div class="col-12">
                         <label class="form-label fw-semibold">Fasilitas</label>
                         <div class="row">
@@ -124,7 +123,7 @@
                         </div>
                     </div>
 
-                    {{-- GALLERY --}}
+                    {{-- GALERI --}}
                     <div class="col-12">
                         <label class="form-label fw-semibold">Galeri Wisata</label>
                         <div id="gallery-container">
@@ -168,10 +167,16 @@
 @endsection
 
 @push('scripts')
+<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+/* ================= MAP PICKER ================= */
 const map = L.map('map').setView([-2.548926, 118.0148634], 5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'Map data &copy; OpenStreetMap contributors',
@@ -186,17 +191,15 @@ function setMarker(lat, lng) {
 }
 map.on('click', function(e) { setMarker(e.latlng.lat, e.latlng.lng); });
 
-// jika ada old value
 @if(old('latitude') && old('longitude'))
     setMarker({{ old('latitude') }}, {{ old('longitude') }});
     map.setView([{{ old('latitude') }}, {{ old('longitude') }}], 12);
 @endif
 
-// DYNAMIC GALLERY
+/* ================= DYNAMIC GALLERY ================= */
 let galleryIndex = {{ old('gallery') ? count(old('gallery')) : 1 }};
 document.getElementById('add-gallery').addEventListener('click', function() {
     if(galleryIndex >= 10) { alert("Maksimal 10 gambar."); return; }
-
     const container = document.getElementById('gallery-container');
     const div = document.createElement('div');
     div.classList.add('row','g-2','mb-2','gallery-item');
@@ -210,6 +213,24 @@ document.getElementById('add-gallery').addEventListener('click', function() {
     `;
     container.appendChild(div);
     galleryIndex++;
+});
+
+/* ================= SWEETALERT LOADING SAAT SUBMIT ================= */
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e){
+        const submitBtn = form.querySelector('[type="submit"]');
+        if(submitBtn) submitBtn.disabled = true;
+
+        Swal.fire({
+            title: 'Sedang mengirim data...',
+            html: 'Tunggu sebentar.',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        setTimeout(() => form.submit(), 50);
+        e.preventDefault();
+    });
 });
 </script>
 @endpush
