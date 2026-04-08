@@ -16,8 +16,12 @@ class Artikel extends Model
         'slug',
         'isi',
         'gambar',
-        'image_public_id'
+        'image_public_id',
+        'is_active',
+        'is_verified',
     ];
+
+    /* ================= BOOT ================= */
 
     protected static function boot()
     {
@@ -30,8 +34,40 @@ class Artikel extends Model
         });
     }
 
+    /* ================= RELATION ================= */
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /* ================= SCOPE ================= */
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeVerified($query)
+    {
+        return $query->where('is_verified', true);
+    }
+
+    public function scopeActiveVerified($query)
+    {
+        return $query->where('is_active', true)
+                     ->where('is_verified', true);
+    }
+
+    /* ================= ACCESSOR ================= */
+
+    public function getShortIsiAttribute()
+    {
+        return Str::limit(strip_tags($this->isi), 120);
+    }
+
+    public function getPenulisAttribute()
+    {
+        return $this->user->name ?? 'Unknown';
     }
 }

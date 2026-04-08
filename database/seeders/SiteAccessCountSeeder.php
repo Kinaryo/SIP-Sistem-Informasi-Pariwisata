@@ -10,8 +10,10 @@ class SiteAccessCountSeeder extends Seeder
 {
     public function run(): void
     {
-        SiteAccessCount::create([
-            'total_access' => 0,
-        ]);
+      
+        SiteAccessCount::updateOrCreate(
+            ['id' => 0], 
+            ['total_access' => 50] 
+        );
     }
 }

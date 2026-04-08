@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LokaTRIP - Sistem Informasi Pariwisata</title>
-    <link rel="icon" type="image/png" href="{{ asset('vaficon.jpeg') }}">
+    <title>visitMerauke.com - Sistem Informasi Pariwisata</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.jpeg') }}">
 
 
     <!-- BOOTSTRAP -->
@@ -22,6 +22,15 @@
         body {
             font-family: 'Poppins', sans-serif;
             scroll-behavior: smooth;
+            font-size: 0.85rem;
+        }
+
+        h5 {
+            font-size: 1rem;
+        }
+
+        small {
+            font-size: 0.75rem;
         }
 
         .hero-section {

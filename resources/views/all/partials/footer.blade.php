@@ -5,11 +5,11 @@
             <div class="col-md-4">
                 <h4 class="fw-bold">
                     <i class="fas fa-map-marked-alt text-primary"></i>
-                    Loka<span class="text-primary">TRIP</span>
+                    Visit<span class="text-primary">MERAUKE</span>
                 </h4>
                 <p class="text-secondary small">
-                    Sistem informasi pariwisata Indonesia yang membantu wisatawan
-                    menemukan destinasi terbaik diwilayah timur nusantara.
+                    VisitMerauke.com adalah platform informasi digital yang menyajikan berbagai informasi
+                    tentang Merauke, mulai dari destinasi wisata, budaya, produk lokal dalam satu tempat.
                 </p>
             </div>
 
@@ -18,10 +18,12 @@
                 <ul class="list-unstyled small">
                     <li><a href="/tentang-kami" class="text-secondary text-decoration-none">Tentang Kami</a></li>
                     <li><a href="/kontak-kami" class="text-secondary text-decoration-none">Kontak Kami</a></li>
-                    
+
                     <!-- ✅ TAMBAHAN WAJIB ADSENSE -->
-                    <li><a href="{{ route('privacy') }}" class="text-secondary text-decoration-none">Privacy Policy</a></li>
-                    <li><a href="{{ route('terms') }}" class="text-secondary text-decoration-none">Terms & Conditions</a></li>
+                    <li><a href="{{ route('privacy') }}" class="text-secondary text-decoration-none">Privacy Policy</a>
+                    </li>
+                    <li><a href="{{ route('terms') }}" class="text-secondary text-decoration-none">Terms &
+                            Conditions</a></li>
                 </ul>
             </div>
 
@@ -29,7 +31,7 @@
                 <h6 class="fw-bold">Kontak</h6>
                 <p class="text-secondary small mb-1">
                     <i class="fas fa-map-marker-alt text-primary"></i>
-                    Papua Selatan, Indonesia
+                    Merauke, Papua Selatan, Indonesia
                 </p>
                 <p class="text-secondary small mb-1">
                     <i class="fas fa-phone text-primary"></i>
@@ -37,7 +39,7 @@
                 </p>
                 <p class="text-secondary small">
                     <i class="fas fa-envelope text-primary"></i>
-                    jelajahimyid@gmail.com
+                    meraukevisit@gmail.com
                 </p>
             </div>
 
@@ -62,8 +64,10 @@
 
         <!-- BAGIAN BAWAH (LEGAL LINK) -->
         <div class="text-center small text-secondary">
-            © {{ date('Y') }} LokaTRIP - Sistem Informasi Pariwisata <br>
+            © {{ date('Y') }} visitMerauke.com <br>
 
+            
+            <a href="#" class="text-secondary text-decoration-none">V.{{ config('app.version') }}</a> |
             <a href="{{ route('privacy') }}" class="text-secondary text-decoration-none">Privacy Policy</a> |
             <a href="{{ route('terms') }}" class="text-secondary text-decoration-none">Terms & Conditions</a>
         </div>

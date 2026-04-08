@@ -105,8 +105,8 @@ class ArtikelController extends Controller
 
         while (
             Artikel::where('slug', $slug)
-                ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
-                ->exists()
+            ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+            ->exists()
         ) {
             $slug = $original . '-' . $counter;
             $counter++;
@@ -125,12 +125,18 @@ class ArtikelController extends Controller
         $search = $request->search;
 
         $artikels = Artikel::with('user')
+            ->activeVerified()
+
             ->when($search, function ($query) use ($search) {
-                $query->where('judul', 'like', "%{$search}%")
-                      ->orWhere('isi', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                        ->orWhere('isi', 'like', "%{$search}%");
+                });
             })
+
             ->latest()
-            ->paginate(9);
+            ->paginate(9)
+            ->withQueryString();
 
         if ($request->ajax()) {
             return view('user.artikel.partials.list', compact('artikels'))->render();
@@ -200,7 +206,6 @@ class ArtikelController extends Controller
 
             return redirect('/dashboard?tab=artikel')
                 ->with('success', 'Artikel berhasil ditambahkan');
-
         } catch (\Exception $e) {
             Log::error("Error store artikel", [
                 'error' => $e->getMessage()
@@ -264,7 +269,6 @@ class ArtikelController extends Controller
 
             return redirect('/dashboard?tab=artikel')
                 ->with('success', 'Artikel berhasil diperbarui');
-
         } catch (\Exception $e) {
             Log::error("Error update artikel", [
                 'artikel_id' => $id,
@@ -294,7 +298,6 @@ class ArtikelController extends Controller
 
             return redirect('/dashboard?tab=artikel')
                 ->with('success', 'Artikel berhasil dihapus');
-
         } catch (\Exception $e) {
             Log::error("Error delete artikel", [
                 'artikel_id' => $id,
@@ -304,4 +307,67 @@ class ArtikelController extends Controller
             return back()->with('error', 'Gagal menghapus artikel');
         }
     }
+
+
+    public function toggleActive($id)
+    {
+        $artikel = Artikel::findOrFail($id);
+
+        $artikel->is_active = !$artikel->is_active;
+        $artikel->save();
+
+        return response()->json([
+            'message' => $artikel->is_active
+                ? 'Artikel berhasil diaktifkan'
+                : 'Artikel berhasil dinonaktifkan'
+        ]);
+    }
+
+
+    // // ================= SHOW =================
+    // public function show($id)
+    // {
+    //     try {
+    //         $artikel = Artikel::with('user')->findOrFail($id);
+
+    //         // Jika request AJAX → kirim JSON
+    //         if (request()->ajax()) {
+    //             return response()->json([
+    //                 'data' => $artikel
+    //             ]);
+    //         }
+
+    //         // Jika bukan AJAX → tampilkan halaman
+    //         return view('admin.artikel.show', compact('artikel'));
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Artikel tidak ditemukan',
+    //             'error' => $e->getMessage()
+    //         ], 404);
+    //     }
+    // }
+
+
+    // // ================= EDIT =================
+    // public function edit($id)
+    // {
+    //     try {
+    //         $artikel = Artikel::findOrFail($id);
+
+    //         // Jika AJAX → kirim JSON (untuk isi modal edit)
+    //         if (request()->ajax()) {
+    //             return response()->json([
+    //                 'data' => $artikel
+    //             ]);
+    //         }
+
+    //         // Jika biasa → halaman edit
+    //         return view('admin.artikel.edit', compact('artikel'));
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Artikel tidak ditemukan',
+    //             'error' => $e->getMessage()
+    //         ], 404);
+    //     }
+    // }
 }

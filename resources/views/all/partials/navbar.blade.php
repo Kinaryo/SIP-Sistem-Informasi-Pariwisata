@@ -29,7 +29,7 @@
     <div class="container">
         <a class="navbar-brand fw-bold" href="/">
             <i class="fas fa-map-marked-alt text-primary me-1"></i>
-            Loka<span class="text-primary">TRIP</span>
+            Visit<span class="text-primary">MERAUKE</span>
         </a>
 
         <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">

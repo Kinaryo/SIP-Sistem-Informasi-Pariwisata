@@ -18,20 +18,23 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             CategorySeeder::class,
-            LocationSeeder::class,
             FacilitySeeder::class,
-            TourismPlaceSeeder::class,
-            GallerySeeder::class,
-            ReviewSeeder::class,
-            FavoriteSeeder::class,
-            VisitSeeder::class,
-            EventSeeder::class,
-            EventRegistrationSeeder::class,
-            QuizSeeder::class,
             SettingSeeder::class,
             SiteAccessCountSeeder::class,
-            ProdukSeeder::class,
-            ArtikelSeeder::class,
+            QuizSeeder::class,
+
+
+
+            // LocationSeeder::class,
+            // TourismPlaceSeeder::class,
+            // GallerySeeder::class,
+            // ReviewSeeder::class,
+            // FavoriteSeeder::class,
+            // VisitSeeder::class,
+            // EventSeeder::class,
+            // EventRegistrationSeeder::class,
+            // ProdukSeeder::class,
+            // ArtikelSeeder::class,
             // TokoSeeder::class,
         ]);
     }

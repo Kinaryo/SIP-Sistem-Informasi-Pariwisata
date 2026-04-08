@@ -31,4 +31,15 @@ class Toko extends Model
     {
         return $this->telepon_aktif && !empty($this->telepon);
     }
+    public function produks()
+    {
+        return $this->hasManyThrough(
+            Produk::class,
+            User::class,
+            'id',        // FK di user (id)
+            'user_id',   // FK di produk
+            'user_id',   // FK di toko
+            'id'         // PK di user
+        );
+    }
 }

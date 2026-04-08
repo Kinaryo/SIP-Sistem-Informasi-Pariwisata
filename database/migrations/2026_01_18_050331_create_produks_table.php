@@ -16,6 +16,8 @@ return new class extends Migration {
             $table->integer('harga')->nullable();
             $table->string('foto')->nullable();
             $table->string('image_public_id')->nullable();
+            $table->boolean('is_active')->default(false);
+            $table->boolean('is_verified')->default(false);
 
             $table->timestamps();
         });

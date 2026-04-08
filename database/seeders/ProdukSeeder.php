@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -18,7 +19,9 @@ class ProdukSeeder extends Seeder
             'deskripsi' => 'Keripik khas Merauke yang gurih dan renyah',
             'harga' => 25000,
             'foto' => $foto,
-             'image_public_id' => '1000shdt'
+            'image_public_id' => '1000shdt',
+            'is_active' => true,
+            'is_verified' => true
         ]);
 
         Produk::create([
@@ -27,7 +30,9 @@ class ProdukSeeder extends Seeder
             'deskripsi' => 'Ikan asap khas Papua dengan cita rasa unik',
             'harga' => 50000,
             'foto' => $foto,
-            'image_public_id' => '1000shdt'
+            'image_public_id' => '1000shdt',
+            'is_active' => true,
+            'is_verified' => true
         ]);
     }
 }

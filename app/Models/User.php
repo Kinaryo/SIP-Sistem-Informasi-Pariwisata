@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Review;
 use App\Models\Favorite;
 use App\Models\EventRegistration;
+    use App\Notifications\CustomResetPassword;
 
 class User extends Authenticatable
 {
@@ -19,7 +20,8 @@ class User extends Authenticatable
         'email',
         'password',
         'address',
-        'role'
+        'role',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -70,4 +72,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(Toko::class);
     }
+
+
+
+public function sendPasswordResetNotification($token)
+{
+    $this->notify(new CustomResetPassword($token));
+}
 }

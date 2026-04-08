@@ -7,34 +7,63 @@ use App\Models\User;
 use App\Models\TourismPlace;
 use App\Models\Location;
 use App\Models\Category;
-use App\Models\SiteAccessCount; // gunakan tabel site_access_counts
-use Illuminate\Http\Request;
+use App\Models\SiteAccessCount;
+use App\Models\Artikel;
+use App\Models\Produk;
+use App\Models\Toko;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Jumlah user biasa
-        $userCount = User::where('role', 'user')->count();
+        /* ================= STATISTIK UTAMA ================= */
 
-        // Jumlah admin
+        $userCount = User::where('role', 'user')->count();
         $adminCount = User::where('role', 'admin')->count();
 
-        // Jumlah provinsi unik
-        $provinceCount = Location::select('province')->distinct()->count();
-
-        // Jumlah kategori
+        $provinceCount = Location::distinct('province')->count('province');
         $categoryCount = Category::count();
 
-        // Jumlah wisata aktif
         $activeTourismCount = TourismPlace::where('is_active', true)->count();
 
-        // Jumlah wisata menunggu verifikasi
-        $pendingVerificationCount = TourismPlace::where('is_verified', false)->count();
-
-        // Total akses situs
         $siteAccess = SiteAccessCount::first();
-        $totalAccess = $siteAccess ? $siteAccess->total_access : 0;
+        $totalAccess = $siteAccess->total_access ?? 0;
+
+        /* ================= VERIFIKASI (DIPISAH) ================= */
+
+        $pendingWisata = TourismPlace::where('is_verified', false)->count();
+        $pendingArtikel = Artikel::where('is_verified', false)->count();
+        $pendingProduk = Produk::where('is_verified', false)->count();
+
+        /* ================= COUNT KONTEN ================= */
+
+        $artikelCount = Artikel::count();
+        $produkCount = Produk::count();
+        $tokoCount = Toko::count();
+
+        /* ================= DATA LIST ================= */
+
+        $latestArtikel = Artikel::with('user')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $latestProduk = Produk::latest()
+            ->limit(5)
+            ->get();
+
+        $latestToko = Toko::with('user')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        /* ================= DESTINASI TERPOPULER ================= */
+
+        // fallback aman kalau visitor_count tidak dipakai
+        $topDestinations = TourismPlace::withCount('visits')
+            ->orderByDesc('visits_count')
+            ->limit(5)
+            ->get();
 
         return view('admin.dashboard', compact(
             'userCount',
@@ -42,8 +71,23 @@ class DashboardController extends Controller
             'provinceCount',
             'categoryCount',
             'activeTourismCount',
-            'pendingVerificationCount',
-            'totalAccess'
+            'totalAccess',
+
+            // verifikasi
+            'pendingWisata',
+            'pendingArtikel',
+            'pendingProduk',
+
+            // konten
+            'artikelCount',
+            'produkCount',
+            'tokoCount',
+
+            // list
+            'latestArtikel',
+            'latestProduk',
+            'latestToko',
+            'topDestinations'
         ));
     }
 }

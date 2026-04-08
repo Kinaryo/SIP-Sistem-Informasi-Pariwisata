@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Admin Dashboard')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="{{ asset('vaficon.jpeg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.jpeg') }}">
 
 
     <!-- BOOTSTRAP -->
@@ -23,6 +23,17 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: #f4f6f9;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+            font-size: 0.85rem;
+        }
+
+        h5 {
+            font-size: 1rem;
+        }
+
+        small {
+            font-size: 0.75rem;
         }
 
         .sidebar {
@@ -67,9 +78,7 @@
         </main>
     </div>
 
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
 </body>
 

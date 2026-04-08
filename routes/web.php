@@ -8,10 +8,15 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TourismPlaceController;
+use App\Http\Controllers\Admin\AdminArtikelController;
+use App\Http\Controllers\Admin\AdminProdukController;
+use App\Http\Controllers\Admin\AdminTokoController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuizQuestionController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\ArtikelController;
 use App\Http\Controllers\User\ProdukController;
 use App\Http\Controllers\User\TokoController;
@@ -24,37 +29,6 @@ use App\Http\Controllers\User\UserQuizController;
 use Cloudinary\Cloudinary;
 use Cloudinary\Configuration\Configuration;
 
-Route::get('/test-cloudinary', function () {
-
-    // Setup manual
-    $cloudinary = new Cloudinary([
-        'cloud' => [
-            'cloud_name' => 'ddrepuzxq',
-            'api_key'    => '736112155155523',
-            'api_secret' => 'Di11B6PPvsjHotH1KCfMpHOpbzM',
-        ],
-        'url' => [
-            'secure' => true
-        ],
-    ]);
-
-    try {
-        $uploaded = $cloudinary->uploadApi()->upload(
-            base_path('public/test.jpg'),
-            [
-                'folder' => 'test_upload',
-                'overwrite' => true,
-            ]
-        );
-
-        return "Upload berhasil! URL: <a href='{$uploaded['secure_url']}' target='_blank'>{$uploaded['secure_url']}</a>";
-    } catch (\Exception $e) {
-        return "Upload gagal: " . $e->getMessage();
-    }
-});
-
-
-
 
 // ===== AUTH =====
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
@@ -64,6 +38,13 @@ Route::get('/register', [AuthController::class, 'registerForm'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.process');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ===== PASSWORD =====
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+
 
 // ===== LANDING =====
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
@@ -96,7 +77,7 @@ Route::middleware(['auth', 'role:user'])->prefix('dashboard')->group(function ()
     Route::get('/toko/{toko}/edit', [TokoController::class, 'edit'])->name('toko.edit');
     Route::put('/toko/{toko}', [TokoController::class, 'update'])->name('toko.update');
 
-    
+
     Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/tambah-tempat-wisata-baru', [UserDashboardController::class, 'createTourismPlaces'])->name('dashboard.createTourismPlaces');
     Route::post('/tambah-tempat-wisata-baru', [UserDashboardController::class, 'storeTourismPlaces'])->name('dashboard.storeTourismPlaces');
@@ -142,9 +123,10 @@ Route::middleware(['auth', 'role:user'])->prefix('dashboard')->group(function ()
         ->name('dashboard.updateInfo');
 
     Route::put('/dashboard/wisata/{id}/location', [UserDashboardController::class, 'updateLocation'])->name('dashboard.updateLocation');
+    Route::patch('/tourism/{id}/toggle-active', [UserDashboardController::class, 'toggleActive'])->name('dashboard.tourism.toggleActive');
+    Route::delete('/tourism/{id}', [UserDashboardController::class, 'destroy'])->name('dashboard.tourism.destroy');
 
 
-    
     // Produk
     Route::get('/produk/create', [ProdukController::class, 'create'])->middleware('auth')->name('produk.create');
     Route::post('/produk', [ProdukController::class, 'store'])->middleware('auth')->name('produk.store');
@@ -152,6 +134,8 @@ Route::middleware(['auth', 'role:user'])->prefix('dashboard')->group(function ()
     Route::get('/produk/{id}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
     Route::put('/produk/{id}', [ProdukController::class, 'update'])->name('produk.update');
     Route::delete('/produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
+    Route::patch('/produk/{id}/toggle-active', [ProdukController::class, 'toggleActive'])->name('produk.toggleActive');
+
     // Artikel
     Route::get('/artikel/create', [ArtikelController::class, 'create'])->middleware('auth')->name('artikel.create');
     Route::post('/artikel', [ArtikelController::class, 'store'])->middleware('auth')->name('artikel.store');
@@ -159,6 +143,7 @@ Route::middleware(['auth', 'role:user'])->prefix('dashboard')->group(function ()
     Route::put('/artikel/{id}', [ArtikelController::class, 'update'])->name('artikel.update');
     Route::get('/artikel/{slug}', [ArtikelController::class, 'showByOwner'])->name('artikel.showByOwner');
     Route::delete('/artikel/{id}', [ArtikelController::class, 'destroy'])->name('artikel.destroy');
+    Route::patch('/artikel/{id}/toggle-active', [ArtikelController::class, 'toggleActive'])->name('artikel.toggleActive');
 });
 
 
@@ -176,6 +161,46 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
         Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+        // Artikel
+        Route::get('/articles', [AdminArtikelController::class, 'index'])->name('articles.index');
+        Route::get('/articles/create', [AdminArtikelController::class, 'create'])->name('articles.create');
+        Route::post('/articles', [AdminArtikelController::class, 'store'])->name('articles.store');
+        Route::get('/articles/{id}', [AdminArtikelController::class, 'show'])->name('articles.show');
+        Route::get('/articles/{id}/edit', [AdminArtikelController::class, 'edit'])->name('articles.edit');
+        Route::put('/articles/{id}', [AdminArtikelController::class, 'update'])->name('articles.update');
+        Route::delete('/articles/{id}', [AdminArtikelController::class, 'destroy'])->name('articles.destroy');
+        Route::patch('/articles/{id}/toggle-active', [AdminArtikelController::class, 'toggleActive'])->name('articles.toggleActive');
+        Route::patch('/articles/{id}/toggle-verified', [AdminArtikelController::class, 'toggleVerified'])->name('articles.toggleVerified');
+
+        // TOKO
+        Route::get('toko', [AdminTokoController::class, 'index'])->name('toko.index');
+        Route::get('toko/create', [AdminTokoController::class, 'create'])->name('toko.create');
+        Route::post('toko', [AdminTokoController::class, 'store'])->name('toko.store');
+        Route::get('toko/{id}', [AdminTokoController::class, 'show'])->name('toko.show');
+        Route::get('toko/{id}/edit', [AdminTokoController::class, 'edit'])->name('toko.edit');
+        Route::put('toko/{id}', [AdminTokoController::class, 'update'])->name('toko.update');
+        Route::delete('toko/{id}', [AdminTokoController::class, 'destroy'])->name('toko.destroy');
+        Route::patch('toko/{id}/toggle-telepon', [AdminTokoController::class, 'toggleTelepon'])->name('toko.toggleTelepon');
+        // TOKO-PRODUK 
+        Route::get('toko/{toko}/produk/create', [AdminTokoController::class, 'createByToko'])->name('toko.produk.create');
+        Route::post('toko/{toko}/produk/store', [AdminTokoController::class, 'storeByToko'])->name('toko.produk.store');
+
+
+
+        // PRODUK 
+        Route::get('/produks', [AdminProdukController::class, 'index'])->name('produks.index');
+        Route::get('/produks/create', [AdminProdukController::class, 'create'])->name('produks.create');
+        Route::post('/produks', [AdminProdukController::class, 'store'])->name('produks.store');
+        Route::get('/produks/{id}', [AdminProdukController::class, 'show'])->name('produks.show');
+        Route::get('/produks/{id}/edit', [AdminProdukController::class, 'edit'])->name('produks.edit');
+        Route::put('/produks/{id}', [AdminProdukController::class, 'update'])->name('produks.update');
+        Route::delete('/produks/{id}', [AdminProdukController::class, 'destroy'])->name('produks.destroy');
+        Route::patch('/produks/{id}/toggle-active', [AdminProdukController::class, 'toggleActive'])->name('produks.toggleActive');
+        Route::patch('/produks/{id}/toggle-verified', [AdminProdukController::class, 'toggleVerified'])->name('produks.toggleVerified');
+
+
+
 
         // Wisata
         Route::get('/tourism-places', [TourismPlaceController::class, 'index'])->name('tourism-places.index');
@@ -219,34 +244,30 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('settings/{id}', [SettingController::class, 'update'])->name('settings.update');
 
+        // USERS 
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::patch('/users/{id}/toggle-active', [UserController::class, 'toggleActive']);
 
-
-        // quiz 
+        // QUIZ
         Route::get('/quiz', [QuizController::class, 'index'])->name('quiz.index');
-        // Halaman show quiz
         Route::get('/quiz/{id}', [QuizController::class, 'showPage'])->name('quiz.show');
-        // API CRUD lainnya
         Route::post('/quiz', [QuizController::class, 'store'])->name('quiz.store');
         Route::put('/quiz/{id}', [QuizController::class, 'update'])->name('quiz.update');
         Route::delete('/quiz/{id}', [QuizController::class, 'destroy'])->name('quiz.destroy');
-
-
+        Route::patch('/quiz/{id}/toggle-active', [QuizController::class, 'toggleActive'])->name('quiz.toggleActive');
         // Leaderboard
         Route::get('/quiz/{id}/leaderboard', [QuizController::class, 'leaderboard'])->name('quiz.leaderboard');
-
         // Quiz Questions
         Route::post('/quiz/{quizId}/question', [QuizQuestionController::class, 'store']);
         Route::put('/quiz/{quizId}/question/{id}', [QuizQuestionController::class, 'update']);
         Route::delete('/quiz/{quizId}/question/{id}', [QuizQuestionController::class, 'destroy']);
-
         // Menampilkan jawaban peserta
         Route::get('/quiz/result/{resultId}/answers', [QuizController::class, 'showAnswers'])->name('quiz.result.answers');
 
-
+        // MASTER FASILITAS 
         Route::get('facilities', [FacilityController::class, 'index'])->name('facilities.index');
         Route::get('facilities/{facility}', [FacilityController::class, 'show'])->name('facilities.show');
         Route::post('facilities', [FacilityController::class, 'store'])->name('facilities.store');

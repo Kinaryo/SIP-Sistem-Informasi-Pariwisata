@@ -11,7 +11,7 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         Setting::create([
-            'office_name' => 'Kantor Pusat',
+            'office_name' => 'Merauke - Papua Selatan',
             'longitude' => 140.3915625,
             'latitude' => -8.5065904,
         ]);

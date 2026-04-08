@@ -16,7 +16,7 @@ class SettingController extends Controller
         // Buat data default jika tabel kosong agar tidak error di view
         if (!$setting) {
             $setting = Setting::create([
-                'office_name' => 'Kantor Pusat',
+                'office_name' => 'Merauke - Papua Selatan',
                 'longitude' => '0',
                 'latitude' => '0'
             ]);

@@ -16,9 +16,13 @@ class ContactController extends Controller
             'message' => 'required|string',
         ]);
 
-        Mail::to('jelajahimyid@gmail.com')
-            ->send(new ContactMail($request->all()));
+        try {
+            Mail::to('meraukevisit@gmail.com')
+                ->send(new ContactMail($request->all()));
 
-        return back()->with('success', 'Pesan berhasil dikirim!');
+            return back()->with('success', 'Pesan berhasil dikirim!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengirim pesan. Silakan coba lagi.');
+        }
     }
 }

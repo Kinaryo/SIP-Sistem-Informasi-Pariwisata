@@ -19,7 +19,9 @@ class ArtikelSeeder extends Seeder
             'slug' => Str::slug('Keindahan Wisata Merauke'),
             'isi' => 'Merauke memiliki banyak tempat wisata menarik yang wajib dikunjungi...',
             'gambar' => null,
-            'image_public_id' => '1000shdt'
+            'image_public_id' => '1000shdt',
+            'is_active' => true,
+            'is_verified' => true
         ]);
 
         Artikel::create([
@@ -28,7 +30,9 @@ class ArtikelSeeder extends Seeder
             'slug' => Str::slug('Makanan Khas Papua yang Wajib Dicoba'),
             'isi' => 'Papua memiliki berbagai makanan khas yang unik dan lezat...',
             'gambar' => null,
-            'image_public_id' => '1000shdt'
+            'image_public_id' => '1000shdt',
+            'is_active' => true,
+            'is_verified' => true
         ]);
     }
 }

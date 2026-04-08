@@ -67,16 +67,12 @@
         }
     }
 
-    /* Card container */
-    .dashboard-container {
-        background: #fff;
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
+
+
+   
 </style>
 
-<div class="container py-5">
+<div class="py-5 px-2 bg-white">
 
     <!-- HEADER -->
     <div class="text-center mb-4 dashboard-header">

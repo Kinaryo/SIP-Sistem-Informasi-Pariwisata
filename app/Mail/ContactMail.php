@@ -19,7 +19,14 @@ class ContactMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Pesan Kontak Website')
-                    ->view('emails.contact');
+        return $this->from(config('mail.from.address'), config('mail.from.name')) // pengirim tetap SMTP
+                    ->replyTo($this->data['email'], $this->data['name']) //supaya bisa dibalas ke user
+                    ->subject('Pesan Baru dari VisitMerauke')
+                    ->view('emails.contact')
+                    ->with([
+                        'name'    => $this->data['name'],
+                        'email'   => $this->data['email'],
+                        'message' => $this->data['message'],
+                    ]);
     }
 }

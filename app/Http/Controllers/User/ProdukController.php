@@ -102,47 +102,37 @@ class ProdukController extends Controller
     }
 
     // ================= INDEX =================
-  public function index(Request $request)
-{
-    Log::info('Akses halaman produk', [
-        'search' => $request->search
-    ]);
+    public function index(Request $request)
+    {
+        Log::info('Akses halaman produk', [
+            'search' => $request->search
+        ]);
 
-    $search = $request->search;
+        $search = $request->search;
 
-    $produks = Produk::with(['user.toko'])
-        ->when($search, function ($query) use ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_produk', 'like', "%{$search}%")
-                  ->orWhere('deskripsi', 'like', "%{$search}%");
-            });
-        })
-        ->latest()
-        ->get()
-        ->map(function ($produk) {
+        $produks = Produk::with(['user.toko'])
+            ->activeVerified() // ✅ FILTER WAJIB
 
-            $toko = optional($produk->user)->toko;
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama_produk', 'like', "%{$search}%")
+                        ->orWhere('deskripsi', 'like', "%{$search}%");
+                });
+            })
 
-            $produk->toko_nama = $toko->nama_toko ?? 'Tidak ada toko';
-            $produk->toko_logo = $toko->logo ?? null;
+            ->latest()
+            ->get();
 
-            $produk->toko_telepon = ($toko && $toko->telepon_aktif)
-                ? $toko->telepon
-                : null;
+        Log::info('Jumlah produk ditemukan', [
+            'total' => $produks->count()
+        ]);
 
-            return $produk;
-        });
+        if ($request->ajax()) {
+            return view('all.produk.partials.list', compact('produks'))->render();
+        }
 
-    Log::info('Jumlah produk ditemukan', [
-        'total' => $produks->count()
-    ]);
-
-    if ($request->ajax()) {
-        return view('all.produk.partials.list', compact('produks'))->render();
+        return view('all.produk.index', compact('produks'));
     }
-
-    return view('all.produk.index', compact('produks'));
-}
 
     // ================= CREATE =================
     public function create()
@@ -314,5 +304,17 @@ class ProdukController extends Controller
                 'message' => 'Gagal menghapus produk'
             ], 500);
         }
+    }
+
+    public function toggleActive($id)
+    {
+        $produk = Produk::where('user_id', auth()->id())->findOrFail($id);
+
+        $produk->is_active = !$produk->is_active;
+        $produk->save();
+
+        return response()->json([
+            'message' => 'Status produk berhasil diupdate'
+        ]);
     }
 }

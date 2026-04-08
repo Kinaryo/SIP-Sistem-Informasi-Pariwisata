@@ -176,57 +176,106 @@
         </div>
     </section>
 
-    <!-- SWEETALERT -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        const formDelete = document.getElementById('formDelete');
-        const btnDelete = document.getElementById('btnDelete');
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        if (formDelete) {
-            formDelete.addEventListener('submit', function (e) {
-                e.preventDefault();
+<script>
+const formDelete = document.getElementById('formDelete');
 
+if (formDelete) {
+    formDelete.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: "Artikel akan dihapus permanen dan tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, hapus sekarang!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                // LOADING
                 Swal.fire({
-                    title: 'Yakin ingin menghapus?',
-                    text: "Artikel akan hilang permanen!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Tampilkan loading
-                        Swal.fire({
-                            title: 'Menghapus...',
-                            allowOutsideClick: false,
-                            didOpen: () => Swal.showLoading()
-                        });
-                        formDelete.submit();
-                    }
+                    title: 'Menghapus...',
+                    text: 'Sedang memproses artikel',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
                 });
-            });
-        }
 
-        // ================= SUCCESS & ERROR =================
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                timer: 1500,
-                showConfirmButton: false
-            });
-        @endif
+                fetch(formDelete.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        'Accept': 'application/json'
+                    },
+                    body: new FormData(formDelete)
+                })
+                .then(response => response.json().then(data => ({
+                    status: response.status,
+                    body: data
+                })))
+                .then(res => {
 
-        @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: "{{ session('error') }}"
-            });
-        @endif
-    </script>
+                    Swal.close();
+
+                    if (res.status === 200) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: res.body.message || 'Artikel berhasil dihapus',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = "{{ route('artikel.index') }}";
+                        });
+
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.body.message || 'Gagal menghapus artikel'
+                        });
+                    }
+
+                })
+                .catch(() => {
+
+                    Swal.close();
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan jaringan / server'
+                    });
+
+                });
+            }
+        });
+    });
+}
+
+// ================= SUCCESS & ERROR (fallback jika redirect biasa) =================
+@if(session('success'))
+Swal.fire({
+    icon: 'success',
+    title: 'Berhasil!',
+    text: "{{ session('success') }}",
+    timer: 1500,
+    showConfirmButton: false
+});
+@endif
+
+@if(session('error'))
+Swal.fire({
+    icon: 'error',
+    title: 'Gagal!',
+    text: "{{ session('error') }}"
+});
+@endif
+</script>
 
 @endsection

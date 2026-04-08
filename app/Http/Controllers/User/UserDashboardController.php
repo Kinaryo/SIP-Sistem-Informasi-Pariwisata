@@ -25,38 +25,101 @@ use Cloudinary\Configuration\Configuration;
 
 class UserDashboardController extends Controller
 {
-   public function index()
-{
-    $user = Auth::user();
 
-    Log::info("User {$user->id} membuka dashboard.");
 
-    // 🌍 Wisata
-    $tourismPlaces = $user->tourismPlaces()->latest()->get();
+    public function index(Request $request)
+    {
+        $user = Auth::user();
 
-    // 🛍️ Produk
-    $produks = $user->produks()->latest()->get();
+        if (!$user) {
+            abort(403, 'Unauthorized');
+        }
 
-    // 📰 Artikel
-    $artikels = $user->artikels()->latest()->get();
+        Log::info("User {$user->id} membuka dashboard.");
 
-    // 🏬 Toko
-    $tokoExists = $user->toko()->exists(); // true jika user punya toko
+        /*
+    |------------------------------------------------------------------
+    | 🌍 WISATA
+    |------------------------------------------------------------------
+    */
+        $tourismPlaces = $user->tourismPlaces()
+            ->with('location')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->filled('active'), function ($query) use ($request) {
+                $query->where('is_active', $request->active);
+            })
+            ->when($request->filled('verified'), function ($query) use ($request) {
+                $query->where('is_verified', $request->verified);
+            })
+            ->latest()
+            ->paginate(10, ['*'], 'wisata_page')
+            ->withQueryString();
 
-    Log::info("User {$user->id} melihat:");
-    Log::info("- {$tourismPlaces->count()} wisata");
-    Log::info("- {$produks->count()} produk");
-    Log::info("- {$artikels->count()} artikel");
-    Log::info("- Toko ada? " . ($tokoExists ? 'ya' : 'tidak'));
 
-    return view('dashboard.index', compact(
-        'user',
-        'tourismPlaces',
-        'produks',
-        'artikels',
-        'tokoExists'
-    ));
-}
+        /*
+    |------------------------------------------------------------------
+    | 🛍️ PRODUK
+    |------------------------------------------------------------------
+    */
+        $produks = $user->produks()
+            ->when($request->filled('search_produk'), function ($query) use ($request) {
+                $query->where('nama_produk', 'like', '%' . $request->search_produk . '%');
+            })
+            ->latest()
+            ->paginate(10, ['*'], 'produk_page')
+            ->withQueryString();
+
+
+        /*
+    |------------------------------------------------------------------
+    | 📰 ARTIKEL (🔥 SUDAH DITAMBAHKAN FILTER BIAR MATCH FRONTEND)
+    |------------------------------------------------------------------
+    */
+        $artikels = $user->artikels()
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where('judul', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->filled('active'), function ($query) use ($request) {
+                $query->where('is_active', $request->active);
+            })
+            ->when($request->filled('verified'), function ($query) use ($request) {
+                $query->where('is_verified', $request->verified);
+            })
+            ->latest()
+            ->paginate(10, ['*'], 'artikel_page')
+            ->withQueryString();
+
+
+        /*
+    |------------------------------------------------------------------
+    | 🏬 TOKO
+    |------------------------------------------------------------------
+    */
+        $tokoExists = $user->toko()->exists();
+
+
+        /*
+    |------------------------------------------------------------------
+    | 📊 LOG (AMAN)
+    |------------------------------------------------------------------
+    */
+        Log::info("User {$user->id} melihat:");
+        Log::info("- {$tourismPlaces->total()} wisata");
+        Log::info("- {$produks->total()} produk");
+        Log::info("- {$artikels->total()} artikel");
+        Log::info("- Toko ada? " . ($tokoExists ? 'ya' : 'tidak'));
+
+
+        return view('dashboard.index', compact(
+            'user',
+            'tourismPlaces',
+            'produks',
+            'artikels',
+            'tokoExists'
+        ));
+    }
 
     public function createTourismPlaces()
     {
@@ -397,7 +460,6 @@ class UserDashboardController extends Controller
     }
 
 
-
     public function updateHero(Request $request, $id)
     {
         $tourism = TourismPlace::where('id', $id)
@@ -610,5 +672,115 @@ class UserDashboardController extends Controller
         );
 
         return back()->with('success', 'Lokasi berhasil diperbarui');
+    }
+
+
+    // ================= TOGGLE ACTIVE =================
+    public function toggleActive($id)
+    {
+        $tourism = TourismPlace::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        try {
+            $tourism->is_active = !$tourism->is_active;
+            $tourism->save();
+
+            Log::info("User " . Auth::id() . " toggle ACTIVE wisata ID {$id} jadi " . ($tourism->is_active ? 'aktif' : 'nonaktif'));
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Status keaktifan berhasil diperbarui',
+                'data' => $tourism
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Gagal toggle active wisata ID {$id}: " . $e->getMessage());
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal update status'
+            ], 500);
+        }
+    }
+
+
+    // ================= DELETE =================
+    public function destroy($id)
+    {
+        $tourism = TourismPlace::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->with('galleries')
+            ->firstOrFail();
+
+        try {
+
+            DB::beginTransaction();
+
+            // Setup Cloudinary
+            $cloudinary = new Cloudinary([
+                'cloud' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key'    => env('CLOUDINARY_API_KEY'),
+                    'api_secret' => env('CLOUDINARY_API_SECRET'),
+                ],
+                'url' => ['secure' => true],
+            ]);
+
+            // ================= HAPUS COVER =================
+            if ($tourism->cover_image) {
+                $this->deleteFromCloudinary($cloudinary, $tourism->cover_image);
+            }
+
+            // ================= HAPUS GALLERY =================
+            foreach ($tourism->galleries as $gallery) {
+                if ($gallery->image) {
+                    $this->deleteFromCloudinary($cloudinary, $gallery->image);
+                }
+                $gallery->delete();
+            }
+
+            // ================= HAPUS RELASI =================
+            $tourism->facilities()->detach();
+
+            // ================= HAPUS DATA =================
+            $tourism->delete();
+
+            DB::commit();
+
+            Log::info("User " . Auth::id() . " menghapus wisata ID {$id}");
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Wisata berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error("Gagal hapus wisata ID {$id}: " . $e->getMessage());
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menghapus wisata'
+            ], 500);
+        }
+    }
+
+    private function deleteFromCloudinary($cloudinary, $url)
+    {
+        try {
+            $parsed = parse_url($url);
+            $path = $parsed['path'] ?? '';
+
+            $publicId = trim($path, '/');
+            $publicId = preg_replace('/\.[^.]+$/', '', $publicId);
+
+            $cloudinary->uploadApi()->destroy($publicId, [
+                'resource_type' => 'image'
+            ]);
+
+            Log::info("File Cloudinary dihapus: {$publicId}");
+        } catch (\Exception $e) {
+            Log::warning("Gagal hapus Cloudinary: " . $e->getMessage());
+        }
     }
 }

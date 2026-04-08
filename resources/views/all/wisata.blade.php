@@ -11,7 +11,7 @@
                 <h2 class="fw-bold display-6 text-dark">Destinasi Wisata</h2>
                 <div class="mx-auto my-3" style="width:80px;height:4px;background:#0d6efd;"></div>
                 <p class="text-muted">
-                    Jelajahi destinasi terbaik Indonesia dari alam hingga budaya
+                    Jelajahi destinasi terbaik Merauke dari alam hingga budaya
                 </p>
             </div>
             <div class="row mb-4 align-items-center">
@@ -68,7 +68,7 @@
                                     <h5 class="fw-bold">{{ $item->name }}</h5>
 
                                     <small class="text-muted d-block mb-2">
-                                        📍 {{ $item->location->city }},
+                                        {{ $item->location->city }},
                                         {{ $item->location->province }}
                                     </small>
 

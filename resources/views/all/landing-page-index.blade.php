@@ -5,23 +5,46 @@
 @section('content')
 
     <!-- ================= HERO ================= -->
-    <section id="home" class="hero-section d-flex align-items-center text-white text-center"
-        style="min-height:100vh;
-                                                            background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
-                                                                        url('{{ asset('hero.png') }}') center/cover no-repeat;">
+    <section id="home" class="hero-section d-flex align-items-center text-white text-center" style="min-height:100vh;
+                            background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)),
+                                        url('{{ asset('hero.png') }}') center/cover no-repeat;">
+
         <div class="container">
-            <h1 class="display-4 fw-bold mb-4">
-                Temukan Keajaiban Indonesia
+
+            <!-- Heading -->
+            <h1 class="display-4 fw-bold mb-3">
+                Mengenal Merauke Lebih Dekat
             </h1>
-            <p class="lead mb-5">
-                Sistem informasi pariwisata untuk menjelajahi keindahan nusantara.
+
+            <!-- Subheading -->
+            <p class="lead mb-4 mx-auto" style="max-width:700px;">
+                Platform informasi digital yang menghadirkan segala hal tentang Merauke
+                mulai dari destinasi wisata, budaya, hingga produk lokal dalam satu tempat.
             </p>
-            <a href="/wisata" class="btn btn-primary btn-lg rounded-pill px-5">
-                Mulai Jelajah
-            </a>
+
+            <!-- CTA -->
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/wisata" class="btn btn-primary btn-lg rounded-pill px-5">
+                    Jelajahi Sekarang
+                </a>
+
+                <a href="/tentang-kami" class="btn btn-outline-light btn-lg rounded-pill px-5">
+                    Tentang Kami
+                </a>
+            </div>
+
+            <!-- Hashtag -->
+            <div class="mt-5 pt-4 d-none d-md-block">
+                <div class="d-flex justify-content-center gap-4 text-white-50 small flex-wrap">
+                    <span>#VisitMerauke</span>
+                    <span>#ExploreMerauke</span>
+                    <span>#PapuaSelatan</span>
+                    <span>#WonderfulIndonesia</span>
+                </div>
+            </div>
+
         </div>
     </section>
-
 
     <!-- ================= STATS ================= -->
     <section class="py-5 bg-white border-bottom">
@@ -32,16 +55,16 @@
                     <small class="text-muted">DESTINASI</small>
                 </div>
                 <div class="col-6 col-md-3">
-                    <h3 class="fw-bold text-primary">{{ $stats['provinces'] }}</h3>
-                    <small class="text-muted">PROVINSI</small>
+                    <h3 class="fw-bold text-primary">{{ $stats['produks'] }}+</h3>
+                    <small class="text-muted">PRODUK</small>
                 </div>
                 <div class="col-6 col-md-3">
                     <h3 class="fw-bold text-primary">{{ $stats['visitors'] }}+</h3>
-                    <small class="text-muted">WISATAWAN</small>
+                    <small class="text-muted">KUNJUNGAN</small>
                 </div>
                 <div class="col-6 col-md-3">
-                    <h3 class="fw-bold text-primary">{{ $stats['rating'] }}</h3>
-                    <small class="text-muted">RATING</small>
+                    <h3 class="fw-bold text-primary">{{ $stats['artikels'] }}+</h3>
+                    <small class="text-muted">ARTIKEL</small>
                 </div>
             </div>
         </div>
@@ -54,29 +77,29 @@
             <div class="text-center mb-5">
                 <h2 class="fw-bold display-6 text-dark">Tentang Kami</h2>
                 <p class="text-muted mt-3">
-                    Platform informasi pariwisata terpercaya dari wilayah timur Indonesia
+                    Platform informasi digital tentang Merauke
                 </p>
             </div>
 
             <div class="row align-items-center g-4">
                 <div class="col-md-6">
-                    <h5 class="fw-semibold mb-3">Tempat Terbaik</h5>
-                    <p class="text-muted">
-                        Kami adalah platform sistem informasi pariwisata yang bertujuan untuk
-                        memperkenalkan keindahan alam, budaya, dan destinasi unggulan Indonesia,
-                        khususnya dari wilayah timur seperti Papua dan Maluku.
+                    <h5 class="fw-semibold mb-3">Tentang VisitMerauke</h5>
+                    <p class="text-muted" style="text-align: justify">
+                        VisitMerauke.com adalah platform sistem informasi yang menghadirkan berbagai informasi penting
+                        mengenai Merauke, Papua Selatan. Kami tidak hanya berfokus pada pariwisata, tetapi juga
+                        memperkenalkan budaya, produk lokal, serta potensi daerah yang dimiliki Merauke.
                     </p>
 
-                    <p class="text-muted">
-                        Melalui website ini, kami ingin membantu wisatawan menemukan destinasi terbaik,
-                        informasi lokasi, serta gambaran wisata yang akurat dan mudah diakses.
+                    <p class="text-muted" style="text-align: justify">
+                        Melalui platform ini, masyarakat dan wisatawan dapat dengan mudah mengakses informasi destinasi,
+                        UMKM lokal, artikel, serta berbagai hal menarik yang ada di Merauke dalam satu tempat.
                     </p>
 
                     <ul class="list-unstyled text-muted mt-3">
-                        <li>✔ Informasi destinasi terpercaya</li>
-                        <li>✔ Data lokasi & peta wisata</li>
-                        <li>✔ Mendukung promosi wisata lokal</li>
-                        <li>✔ 100% Gratis</li>
+                        <li>✔ Informasi destinasi & budaya Merauke</li>
+                        <li>✔ Direktori UMKM & produk lokal</li>
+                        <li>✔ Artikel & wawasan daerah</li>
+                        <li>✔ Mendukung promosi dan digitalisasi Merauke</li>
                     </ul>
                 </div>
 
@@ -96,7 +119,7 @@
                 <h2 class="fw-bold display-6 text-dark">Destinasi Wisata</h2>
                 <div class="mx-auto my-3" style="width:80px;height:4px;background:#0d6efd;"></div>
                 <p class="text-muted">
-                    Jelajahi destinasi terbaik Indonesia dari alam hingga budaya
+                    Temukan tempat menarik dan pengalaman unik yang ada di Merauke
                 </p>
             </div>
 
@@ -119,7 +142,7 @@
                                     <h5 class="fw-bold">{{ $item->name }}</h5>
 
                                     <small class="text-muted d-block mb-2">
-                                        📍 {{ $item->location->city }},
+                                        {{ $item->location->city }},
                                         {{ $item->location->province }}
                                     </small>
 
@@ -146,10 +169,10 @@
         <div class="container">
 
             <div class="text-center mb-5">
-                <h2 class="fw-bold display-6 text-dark">Produk</h2>
+                <h2 class="fw-bold display-6 text-dark">Produk Lokal</h2>
                 <div class="mx-auto my-3" style="width:80px;height:4px;background:#0d6efd;"></div>
                 <p class="text-muted">
-                    Jelajahi Produk Daerah Indonesia Timur
+                    Jelajahi dan dukung produk UMKM asli Merauke
                 </p>
             </div>
 
@@ -241,10 +264,10 @@
 
 
             <div class="text-center mb-5">
-                <h2 class="fw-bold display-6 text-dark">Artikel Terbaru</h2>
+                <h2 class="fw-bold display-6 text-dark">Informasi Dan Artikel Terbaru</h2>
                 <div class="mx-auto my-3" style="width:80px;height:4px;background:#0d6efd;"></div>
                 <p class="text-muted">
-                    Jelajahi Artikel Kami
+                    Baca berbagai informasi, cerita, dan perkembangan terbaru dari Merauke
                 </p>
             </div>
 
@@ -258,13 +281,15 @@
                         <div class="card border-0 shadow-sm rounded-4 h-100 card-hover">
 
                             <!-- Gambar -->
-                            @if ($artikel->gambar)
-                                <img src="{{ asset('storage/' . $artikel->gambar) }}" class="w-100 rounded-top-4"
-                                    style="height:200px; object-fit:cover;">
+                            @if($artikel->gambar)
+                                        <img src="{{ \Illuminate\Support\Str::startsWith($artikel->gambar, 'http')
+                                ? $artikel->gambar
+                                : asset('storage/' . $artikel->gambar) }}" class="card-img-top rounded-top-4"
+                                            style="height:200px; object-fit:cover;">
                             @else
-                                <div class="bg-light d-flex align-items-center justify-content-center rounded-top-4"
+                                <div class="d-flex align-items-center justify-content-center bg-light rounded-top-4"
                                     style="height:200px;">
-                                    <small class="text-muted">No Image</small>
+                                    <small class="text-muted">Tidak ada gambar</small>
                                 </div>
                             @endif
 
@@ -277,8 +302,7 @@
 
                                 <!-- Info -->
                                 <small class="text-muted mb-2">
-                                    {{ $artikel->user->name ?? 'Admin' }} •
-                                    {{ $artikel->created_at->format('d M Y') }}
+                                    {{ $artikel->user->name ?? 'Admin' }}
                                 </small>
 
                                 <!-- Isi -->
@@ -314,7 +338,7 @@
                 <div class="text-center mb-5">
                     <h2 class="fw-bold display-6">Kontak Kami</h2>
                     <p class="text-muted">
-                        Hubungi kami atau kunjungi langsung kantor kami
+                        Hubungi tim VisitMerauke untuk informasi, kerja sama, atau pertanyaan
                     </p>
                 </div>
 
@@ -327,7 +351,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('kontak.kirim') }}" method="POST" class="row g-3">
+                        <form id="contactForm" action="{{ route('kontak.kirim') }}" method="POST" class="row g-3">
                             @csrf
 
                             <div class="col-12">
@@ -355,14 +379,13 @@
                     <div class="col-md-6">
                         <h6 class="fw-semibold mb-3">Lokasi Kami</h6>
                         <div class="ratio ratio-4x3 rounded overflow-hidden">
-                            {{-- Gunakan latitude & longitude dari $setting --}}
                             <iframe
                                 src="https://www.google.com/maps?q={{ $setting->latitude ?? '-6.200000' }},{{ $setting->longitude ?? '106.816666' }}&z=15&output=embed"
                                 style="border:0;" loading="lazy">
                             </iframe>
                         </div>
                         <small class="text-muted d-block mt-2">
-                            📍 {{ $setting->office_name ?? 'Kantor Pusat' }}
+                            {{ $setting->office_name ?? 'Merauke – Papua Selatan' }}
                         </small>
                     </div>
                 </div>
@@ -381,4 +404,62 @@
             })
         })
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const form = document.getElementById('contactForm');
+
+            if (form) {
+                form.addEventListener('submit', function () {
+
+                    Swal.fire({
+                        title: 'Mengirim pesan...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                });
+            }
+
+        });
+    </script>
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#0d6efd'
+            }).then(() => {
+                document.getElementById('contactForm').reset();
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: '{{ session('error') }}',
+                confirmButtonColor: '#dc3545'
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                html: `{!! implode('<br>', $errors->all()) !!}`,
+                confirmButtonColor: '#dc3545'
+            });
+        </script>
+    @endif
 @endsection

@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
     {
         User::create([
             'name' => 'Admin Wisata',
-            'email' => 'jelajahiadmin@gmail.com',
+            'email' => 'meraukevisit@gmail.com',
             'password' => Hash::make('Kinaryo733@'),
             'role' => 'admin',
             'address' => 'Pariwisata'
@@ -26,12 +26,5 @@ class UserSeeder extends Seeder
             'address' => 'Merauke'
         ]);
 
-        User::create([
-            'name' => 'Zahra',
-            'email' => 'zahrah@gmail.com',
-            'password' => Hash::make('password'),
-            'role' => 'user',
-            'address' => 'Merauke'
-        ]);
     }
 }

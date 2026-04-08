@@ -50,12 +50,12 @@
 
             <!-- Gambar -->
             @if($artikel->gambar)
-                <img src="{{ asset('storage/'.$artikel->gambar) }}"
-                     class="card-img-top rounded-top-4"
-                     style="height:200px; object-fit:cover;">
+                <img src="{{ \Illuminate\Support\Str::startsWith($artikel->gambar, 'http')
+                    ? $artikel->gambar
+                    : asset('storage/' . $artikel->gambar) }}" class="card-img-top rounded-top-4"
+                    style="height:200px; object-fit:cover;">
             @else
-                <div class="d-flex align-items-center justify-content-center bg-light rounded-top-4"
-                     style="height:200px;">
+                <div class="d-flex align-items-center justify-content-center bg-light rounded-top-4" style="height:200px;">
                     <small class="text-muted">Tidak ada gambar</small>
                 </div>
             @endif
@@ -69,7 +69,7 @@
 
                 <!-- Penulis -->
                 <p class="small text-muted mb-1">
-                    {{ $artikel->user->name ?? 'Admin' }} • {{ $artikel->created_at->format('d M Y') }}
+                    {{ $artikel->user->name ?? 'Admin' }}
                 </p>
 
                 <!-- Isi -->
@@ -78,8 +78,7 @@
                 </p>
 
                 <!-- Tombol -->
-                <a href="{{ route('artikel.show', $artikel->slug) }}"
-                   class="btn btn-outline-primary btn-sm mt-2">
+                <a href="{{ route('artikel.show', $artikel->slug) }}" class="btn btn-outline-primary btn-sm mt-2">
                     Baca Selengkapnya →
                 </a>
 

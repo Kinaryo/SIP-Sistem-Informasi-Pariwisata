@@ -23,11 +23,40 @@ class TourismPlaceController extends Controller
     /* =========================
      * LIST SEMUA WISATA
      * ========================= */
-    public function index()
+    public function index(Request $request)
     {
-        $places = TourismPlace::with(['category', 'location', 'author'])
-            ->latest()
-            ->paginate(10);
+        $query = TourismPlace::with(['category', 'location', 'author']);
+
+        // ================= SEARCH =================
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // ================= FILTER STATUS AKTIF =================
+        if ($request->filled('status')) {
+            if ($request->status == 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status == 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        // ================= FILTER VERIFIKASI =================
+        if ($request->filled('verified')) {
+            if ($request->verified == 'verified') {
+                $query->where('is_verified', true);
+            } elseif ($request->verified == 'unverified') {
+                $query->where('is_verified', false);
+            }
+        }
+
+        // ================= SORT + PAGINATION =================
+        $places = $query->latest()->paginate(4)->withQueryString();
+
+        // ================= AJAX SUPPORT =================
+        if ($request->ajax()) {
+            return response()->json($places);
+        }
 
         return view('admin.tourism_places.index', compact('places'));
     }
@@ -268,15 +297,14 @@ class TourismPlaceController extends Controller
             'is_active'   => true,
         ]);
 
-        Log::notice('ADMIN VERIFIKASI WISATA USER', [
-            'admin_id' => (int) Auth::id(),
-            'wisata_id' => (int) $id,
-            'author_id' => (int) $place->user_id
-        ]);
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Wisata berhasil diverifikasi'
+            ]);
+        }
 
-        return redirect()
-            ->back()
-            ->with('success', 'Wisata berhasil diverifikasi');
+        return back()->with('success', 'Wisata berhasil diverifikasi');
     }
 
     /* =========================
@@ -286,36 +314,32 @@ class TourismPlaceController extends Controller
     {
         $place = TourismPlace::findOrFail($id);
 
-        $place->update([
-            'is_active' => false
-        ]);
+        $place->update(['is_active' => false]);
 
-        Log::warning('ADMIN NONAKTIFKAN WISATA', [
-            'admin_id' => (int) Auth::id(),
-            'wisata_id' => (int) $id
-        ]);
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Wisata berhasil dinonaktifkan'
+            ]);
+        }
 
-        return redirect()
-            ->back()
-            ->with('success', 'Wisata berhasil dinonaktifkan');
+        return back()->with('success', 'Wisata berhasil dinonaktifkan');
     }
 
     public function activate($id)
     {
         $place = TourismPlace::findOrFail($id);
 
-        $place->update([
-            'is_active' => true
-        ]);
+        $place->update(['is_active' => true]);
 
-        Log::info('ADMIN AKTIFKAN WISATA', [
-            'admin_id' => (int) Auth::id(),
-            'wisata_id' => (int) $id
-        ]);
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Wisata berhasil diaktifkan'
+            ]);
+        }
 
-        return redirect()
-            ->back()
-            ->with('success', 'Wisata berhasil diaktifkan');
+        return back()->with('success', 'Wisata berhasil diaktifkan');
     }
 
     /* =========================
@@ -326,10 +350,12 @@ class TourismPlaceController extends Controller
         $place = TourismPlace::findOrFail($id);
         $place->delete();
 
-        Log::alert('ADMIN HAPUS WISATA', [
-            'admin_id' => (int) Auth::id(),
-            'wisata_id' => (int) $id
-        ]);
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Wisata berhasil dihapus'
+            ]);
+        }
 
         return redirect()
             ->route('admin.tourism-places.index')

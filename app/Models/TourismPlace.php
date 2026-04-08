@@ -10,15 +10,14 @@ class TourismPlace extends Model
 {
     use HasFactory;
 
-    /**
-     * Mass assignable fields
-     */
+    /* ================= FILLABLE ================= */
+
     protected $fillable = [
         'user_id',
         'category_id',
         'location_id',
         'name',
-        'slug',           // pastikan slug ada di fillable
+        'slug',
         'description',
         'ticket_price',
         'open_time',
@@ -29,15 +28,13 @@ class TourismPlace extends Model
         'is_verified',
     ];
 
-    /**
-     * Boot method untuk auto-generate slug
-     */
+    /* ================= BOOT ================= */
+
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
-            // Hanya generate slug jika belum ada
             if (empty($model->slug)) {
                 $model->slug = Str::slug($model->name);
             }
@@ -68,10 +65,7 @@ class TourismPlace extends Model
 
     public function facilities()
     {
-        return $this->belongsToMany(
-            Facility::class,
-            'tourism_facility' // nama pivot table
-        );
+        return $this->belongsToMany(Facility::class, 'tourism_facility');
     }
 
     public function reviews()
@@ -92,5 +86,62 @@ class TourismPlace extends Model
     public function events()
     {
         return $this->hasMany(Event::class);
+    }
+
+    /* ================= SCOPE ================= */
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeVerified($query)
+    {
+        return $query->where('is_verified', true);
+    }
+
+    public function scopeActiveVerified($query)
+    {
+        return $query->where('is_active', true)
+                     ->where('is_verified', true);
+    }
+
+    public function scopePopular($query)
+    {
+        return $query->withCount('visits')
+                     ->orderByDesc('visits_count');
+    }
+
+    /* ================= ACCESSOR ================= */
+
+    public function getFullAddressAttribute()
+    {
+        return $this->location
+            ? $this->location->province . ', ' . $this->location->city
+            : '-';
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return round($this->reviews()->avg('rating'), 1) ?? 0;
+    }
+
+    public function getTotalReviewsAttribute()
+    {
+        return $this->reviews()->count();
+    }
+
+    public function getTotalVisitsAttribute()
+    {
+        return $this->visits()->count();
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        if (!$this->is_verified) {
+            return 'Menunggu Verifikasi';
+        }
+
+        return $this->is_active ? 'Aktif' : 'Nonaktif';
     }
 }
