@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuizQuestionController;
+use App\Http\Controllers\Admin\VisitorController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\ArtikelController;
@@ -49,6 +50,7 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name(
 // ===== LANDING =====
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 Route::get('/tentang-kami', [LandingPageController::class, 'about'])->name('tentang.kami');
+Route::get('/footer-stats', [LandingPageController::class, 'footerStats'])->name('footer.stats');
 
 Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
 Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
@@ -273,4 +275,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('facilities', [FacilityController::class, 'store'])->name('facilities.store');
         Route::put('facilities/{facility}', [FacilityController::class, 'update'])->name('facilities.update');
         Route::delete('facilities/{facility}', [FacilityController::class, 'destroy'])->name('facilities.destroy');
+
+        //   VISITORS 
+        Route::get('/visitors', [VisitorController::class, 'index'])->name('visitors.index');
     });

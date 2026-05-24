@@ -17,7 +17,7 @@
                     <div class="card-body p-4 p-md-5">
                         
                         <div class="mb-5">
-                            <p class="fs-5 text-secondary leading-relaxed">
+                            <p class="fs-6 text-secondary leading-relaxed">
                                 Kami menghargai privasi Anda. Halaman ini menjelaskan bagaimana kami mengumpulkan, 
                                 menggunakan, dan melindungi informasi pengguna di website ini dengan transparansi penuh.
                             </p>

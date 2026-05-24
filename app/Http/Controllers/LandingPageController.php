@@ -5,18 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Artikel;
 use App\Models\TourismPlace;
 use App\Models\Category;
-use App\Models\Location;
 use App\Models\Produk;
 use App\Models\Setting;
 use App\Models\SiteAccessCount;
+use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
 
 class LandingPageController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // ================= DESTINASI =================
         $destinations = TourismPlace::with(['category', 'location'])
             ->where('is_active', true)
             ->where('is_verified', true)
@@ -24,7 +24,6 @@ class LandingPageController extends Controller
             ->limit(3)
             ->get();
 
-        // ================= PRODUK =================
         $produks = Produk::with(['user.toko'])
             ->where('is_active', true)
             ->where('is_verified', true)
@@ -32,7 +31,6 @@ class LandingPageController extends Controller
             ->limit(4)
             ->get();
 
-        // ================= ARTIKEL =================
         $artikels = Artikel::with('user')
             ->where('is_active', true)
             ->where('is_verified', true)
@@ -40,37 +38,82 @@ class LandingPageController extends Controller
             ->limit(3)
             ->get();
 
-        // ================= SETTING =================
         $setting = Setting::first();
 
-        // ================= HITUNG VISITOR =================
         $access = SiteAccessCount::first();
 
         if (!$access) {
-            $access = SiteAccessCount::create(['total_access' => 1]);
-        } else {
-            $access->increment('total_access');
-            $access->refresh();
+            $access = SiteAccessCount::create([
+                'total_access' => 0
+            ]);
         }
 
-        // ================= STATS (FIX) =================
+        $userId = auth()->id();
+        $ipAddress = $request->ip();
+
+        $visitQuery = Visit::where('visited_at', '>=', now()->subMinutes(30));
+
+        if ($userId) {
+            $visitQuery->where('user_id', $userId);
+        } else {
+            $visitQuery->where('ip_address', $ipAddress);
+        }
+
+        $existingVisit = $visitQuery->first();
+
+        if (!$existingVisit) {
+            Visit::create([
+                'user_id'    => $userId,
+                'session_id' => $request->session()->getId(),
+                'ip_address' => $ipAddress,
+                'user_agent' => $request->userAgent(),
+                'path'       => $request->path(),
+                'method'     => $request->method(),
+                'referer'    => $request->headers->get('referer'),
+                'visited_at' => now(),
+            ]);
+        }
+
+        $todayVisits = Visit::whereDate('visited_at', Carbon::today())->count();
+
+        $weeklyVisits = Visit::whereBetween(
+            'visited_at',
+            [
+                Carbon::now()->startOfWeek(),
+                Carbon::now()->endOfWeek()
+            ]
+        )->count();
+
+        $monthlyVisits = Visit::whereMonth('visited_at', Carbon::now()->month)
+            ->whereYear('visited_at', Carbon::now()->year)
+            ->count();
+
+        $totalVisitRecords = Visit::count();
+
+        $grandTotalVisitors = $access->total_access + $totalVisitRecords;
+
         $stats = [
             'destinations' => TourismPlace::where('is_active', true)
                 ->where('is_verified', true)
                 ->count(),
 
-            'visitors'     => $access->total_access,
+            'visitors' => $grandTotalVisitors,
 
-            'produks'      => Produk::where('is_active', true)
+            'visitors_today' => $todayVisits,
+
+            'visitors_week' => $weeklyVisits,
+
+            'visitors_month' => $monthlyVisits,
+
+            'produks' => Produk::where('is_active', true)
                 ->where('is_verified', true)
                 ->count(),
 
-            'artikels'     => Artikel::where('is_active', true)
+            'artikels' => Artikel::where('is_active', true)
                 ->where('is_verified', true)
                 ->count(),
         ];
 
-        // ================= CATEGORY =================
         $categories = Category::all();
 
         return view('all.landing-page-index', compact(
@@ -88,14 +131,12 @@ class LandingPageController extends Controller
         $categories = Category::all();
 
         $query = TourismPlace::with(['category', 'location'])
-            ->activeVerified(); // pakai scope
+            ->activeVerified();
 
-        // Filter kategori
         $query->when($request->category, function ($q) use ($request) {
             $q->where('category_id', $request->category);
         });
 
-        // Search
         $query->when($request->search, function ($q) use ($request) {
             $q->where('name', 'like', '%' . $request->search . '%');
         });
@@ -112,11 +153,13 @@ class LandingPageController extends Controller
 
     public function contact()
     {
-        return view('all.contact');
+        $setting = Setting::first();
+
+        return view('all.contact', compact('setting'));
     }
+
     public function show($slug)
     {
-        // ================= DATA WISATA =================
         $tourism_place = TourismPlace::with([
             'category',
             'location',
@@ -129,35 +172,34 @@ class LandingPageController extends Controller
             ->where('is_verified', true)
             ->firstOrFail();
 
-        // ================= DETEKSI LOKASI USER =================
-        $ip = request()->ip();
+        $userCity = 'Merauke';
+        $userProvince = 'Papua Selatan';
 
-        $locationData = null;
+        try {
+            if (function_exists('geoip')) {
+                $ip = request()->ip();
 
-        // 🔥 SKIP kalau localhost (INI KUNCI NYA)
-        if (!in_array($ip, ['127.0.0.1', '::1'])) {
-            $locationData = Cache::remember('geoip_' . $ip, 3600, function () use ($ip) {
-                return Location::get($ip);
-            });
+                if (!in_array($ip, ['127.0.0.1', '::1'])) {
+                    $geo = Cache::remember('geoip_' . $ip, 3600, function () use ($ip) {
+                        return geoip($ip);
+                    });
+
+                    if ($geo) {
+                        if (is_array($geo)) {
+                            $userCity = $geo['city'] ?? $userCity;
+                            $userProvince = $geo['state'] ?? $userProvince;
+                        } elseif (is_object($geo)) {
+                            $userCity = $geo->city ?? $userCity;
+                            $userProvince = $geo->state ?? $userProvince;
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
         }
 
-        // ================= DEFAULT =================
-        $userCity = 'Kota Anda';
-        $userProvince = null;
-
-        if ($locationData) {
-            $userCity = $locationData->cityName ?? 'Kota Anda';
-            $userProvince = $locationData->regionName ?? null;
-        } else {
-            // 🔥 fallback kalau localhost / gagal
-            $userCity = 'Merauke';
-            $userProvince = 'Papua Selatan';
-        }
-
-        // ================= ESTIMASI =================
         $estimasiTiket = rand(1200000, 3500000);
 
-        // ================= RETURN =================
         return view('all.show', compact(
             'tourism_place',
             'userCity',
@@ -165,4 +207,27 @@ class LandingPageController extends Controller
             'estimasiTiket'
         ));
     }
+
+   public function footerStats()
+{
+    $access = SiteAccessCount::first();
+
+    if (!$access) {
+        $access = SiteAccessCount::create([
+            'total_access' => 0
+        ]);
+    }
+
+    $todayVisits = Visit::whereDate('visited_at', Carbon::today())->count();
+
+    $monthlyVisits = Visit::whereMonth('visited_at', Carbon::now()->month)
+        ->whereYear('visited_at', Carbon::now()->year)
+        ->count();
+
+    return response()->json([
+        'visitors_today' => $todayVisits,
+        'visitors_month' => $monthlyVisits,
+        'visitors' => $access->total_access + Visit::count(),
+    ]);
+}
 }

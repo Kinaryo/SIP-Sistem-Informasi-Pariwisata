@@ -302,31 +302,67 @@
 @endsection
 
     @push('scripts')
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                @if ($tourism_place->location?->latitude && $tourism_place->location?->longitude)
-                    const map = L.map('map').setView([
-                            {{ $tourism_place->location->latitude }},
-                        {{ $tourism_place->location->longitude }}
-                    ], 15);
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap contributors'
-                    }).addTo(map);
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
 
-                    L.marker([
-                            {{ $tourism_place->location->latitude }},
-                        {{ $tourism_place->location->longitude }}
-                    ]).addTo(map);
-                @endif
+                    @if ($tourism_place->location?->latitude && $tourism_place->location?->longitude)
+
+                                const lat = {{ $tourism_place->location->latitude }};
+                                const lng = {{ $tourism_place->location->longitude }};
+
+                                const map = L.map('map', {
+                                    center: [lat, lng],
+                                    zoom: 15
+                                });
+
+                                const osm = L.tileLayer(
+                                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    { attribution: '&copy; OpenStreetMap' }
+                                );
+
+                                const googleStreet = L.tileLayer(
+                                    'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                                    { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
+                                );
+
+                                const googleSat = L.tileLayer(
+                                    'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                                    { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
+                                );
+
+                                const googleHybrid = L.tileLayer(
+                                    'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                                    { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
+                                );
+
+                                googleHybrid.addTo(map);
+
+                                L.control.layers({
+                                    "OpenStreetMap": osm,
+                                    "Google Street": googleStreet,
+                                    "Satellite": googleSat,
+                                    "Hybrid": googleHybrid
+                                }).addTo(map);
+
+                                const marker = L.marker([lat, lng]).addTo(map);
+
+                                marker.bindPopup(`
+                            <b>{{ $tourism_place->name }}</b><br>
+                            {{ $tourism_place->location->address ?? '' }}
+                        `).openPopup();
+
+                    @endif
+
         });
 
-            function previewImage(src) {
-                document.getElementById('imagePreview').src = src;
-                new bootstrap.Modal(document.getElementById('imagePreviewModal')).show();
-            }
-        </script>
+                function previewImage(src) {
+                    document.getElementById('imagePreview').src = src;
+                    new bootstrap.Modal(document.getElementById('imagePreviewModal')).show();
+                }
+            </script>
+
     @endpush

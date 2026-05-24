@@ -85,7 +85,7 @@
                 <div class="col-md-6">
                     <h5 class="fw-semibold mb-3">Tentang VisitMerauke</h5>
                     <p class="text-muted" style="text-align: justify">
-                        VisitMerauke.com adalah platform sistem informasi yang menghadirkan berbagai informasi penting
+                        visitmerauke.com adalah platform sistem informasi yang menghadirkan berbagai informasi penting
                         mengenai Merauke, Papua Selatan. Kami tidak hanya berfokus pada pariwisata, tetapi juga
                         memperkenalkan budaya, produk lokal, serta potensi daerah yang dimiliki Merauke.
                     </p>
@@ -380,7 +380,7 @@
                         <h6 class="fw-semibold mb-3">Lokasi Kami</h6>
                         <div class="ratio ratio-4x3 rounded overflow-hidden">
                             <iframe
-                                src="https://www.google.com/maps?q={{ $setting->latitude ?? '-6.200000' }},{{ $setting->longitude ?? '106.816666' }}&z=15&output=embed"
+                                src="https://www.google.com/maps?q={{ $setting->latitude ?? '' }},{{ $setting->longitude ?? '' }}&z=15&output=embed"
                                 style="border:0;" loading="lazy">
                             </iframe>
                         </div>

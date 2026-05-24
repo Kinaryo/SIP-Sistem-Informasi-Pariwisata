@@ -15,7 +15,7 @@ class CustomResetPassword extends ResetPassword
         ], false));
 
         return (new MailMessage)
-            ->subject('Reset Password - visitMerauke.com')
+            ->subject('Reset Password - visitmerauke.com')
             ->view('emails.reset-password', [
                 'url' => $url,
                 'user' => $notifiable

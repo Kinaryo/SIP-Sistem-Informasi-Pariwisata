@@ -51,15 +51,16 @@
                     <div class="col-md-6">
                         <h6 class="fw-semibold mb-3">Lokasi Kami</h6>
 
+                    
                         <div class="ratio ratio-4x3 rounded overflow-hidden">
                             <iframe
-                                src="https://www.google.com/maps?q={{ $setting->latitude ?? '-8.4936' }},{{ $setting->longitude ?? '140.4016' }}&z=15&output=embed"
+                                src="https://www.google.com/maps?q={{ $setting->latitude ?? '' }},{{ $setting->longitude ?? '' }}&z=15&output=embed"
                                 style="border:0;" loading="lazy">
                             </iframe>
                         </div>
 
                         <small class="text-muted d-block mt-2">
-                            {{ $setting->office_name ?? 'Merauke – Papua Selatan' }}
+                            {{ $setting->office_name ?? 'Merausske – Papua Selatan' }}
                         </small>
                     </div>
 

@@ -23,8 +23,8 @@ class AppServiceProvider extends ServiceProvider
     {
           Paginator::useBootstrap();
         // Memaksa semua URL menggunakan HTTPS di environment production
-        if ($this->app->environment('production')) {
-            URL::forceScheme('https');
-        }
+        // if ($this->app->environment('production')) {
+        //     URL::forceScheme('https');
+        // }
     }
 }

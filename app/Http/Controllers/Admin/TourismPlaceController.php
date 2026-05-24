@@ -87,10 +87,11 @@ class TourismPlaceController extends Controller
     }
 
 
+
     public function store(Request $request)
     {
         // ================= VALIDASI =================
-        $request->validate([
+        $validated = $request->validate([
             'category_id'  => 'required|exists:categories,id',
             'name'         => 'required|string|max:150',
             'description'  => 'required|string',
@@ -112,114 +113,133 @@ class TourismPlaceController extends Controller
 
             'facilities'   => 'nullable|array',
             'facilities.*' => 'exists:facilities,id',
+        ], [
+            'category_id.required' => 'Kategori wajib dipilih.',
+            'name.required'        => 'Nama wisata wajib diisi.',
+            'description.required' => 'Deskripsi wajib diisi.',
+            'ticket_price.required' => 'Harga tiket wajib diisi.',
+            'open_time.required'   => 'Jam buka wajib diisi.',
+            'close_time.required'  => 'Jam tutup wajib diisi.',
+            'province.required'    => 'Provinsi wajib diisi.',
+            'city.required'        => 'Kota/Kabupaten wajib diisi.',
         ]);
 
         try {
-            return DB::transaction(function () use ($request) {
+            DB::beginTransaction();
 
-                // ================= CREATE LOCATION =================
-                $location = Location::create([
-                    'province'  => $request->province,
-                    'city'      => $request->city,
-                    'district'  => $request->district,
-                    'address'   => $request->address,
-                    'latitude'  => $request->latitude,
-                    'longitude' => $request->longitude,
-                ]);
+            // ================= CEK LOGIN =================
+            if (!auth()->check()) {
+                throw new \Exception('User belum login.');
+            }
 
-                // ================= SETUP CLOUDINARY =================
-                $cloudinary = new Cloudinary([
-                    'cloud' => [
-                        'cloud_name' => env('CLOUDINARY_CLOUD_NAME', 'ddrepuzxq'),
-                        'api_key'    => env('CLOUDINARY_API_KEY', '736112155155523'),
-                        'api_secret' => env('CLOUDINARY_API_SECRET', 'Di11B6PPvsjHotH1KCfMpHOpbzM'),
-                    ],
-                    'url' => ['secure' => true],
-                ]);
+            // ================= CREATE LOCATION =================
+            $location = Location::create([
+                'province'  => $request->province,
+                'city'      => $request->city,
+                'district'  => $request->district,
+                'address'   => $request->address,
+                'latitude'  => $request->latitude,
+                'longitude' => $request->longitude,
+            ]);
 
-                // ================= UPLOAD COVER IMAGE =================
-                $coverPath = null;
-                if ($request->hasFile('cover_image')) {
-                    $file = $request->file('cover_image');
-                    if ($file && file_exists($file->getRealPath())) {
-                        $uploadedCover = $cloudinary->uploadApi()->upload(
-                            $file->getRealPath(),
-                            [
-                                'folder' => 'tourism_places',
-                                'overwrite' => true,
-                            ]
+            // ================= CLOUDINARY (PAKAI URL) =================
+            $cloudinaryUrl = env('CLOUDINARY_URL');
+
+            if (!$cloudinaryUrl) {
+                throw new \Exception('CLOUDINARY_URL belum diset di file .env');
+            }
+
+            $cloudinary = new Cloudinary($cloudinaryUrl);
+
+            // ================= UPLOAD COVER =================
+            $coverPath = null;
+
+            if ($request->hasFile('cover_image')) {
+                $file = $request->file('cover_image');
+
+                if ($file && $file->isValid()) {
+                    $upload = $cloudinary->uploadApi()->upload(
+                        $file->getRealPath(),
+                        ['folder' => 'tourism_places']
+                    );
+
+                    $coverPath = $upload['secure_url'] ?? null;
+                }
+            }
+
+            // ================= GENERATE SLUG =================
+            $slug = Str::slug($request->name);
+            $originalSlug = $slug;
+            $i = 1;
+
+            while (TourismPlace::where('slug', $slug)->exists()) {
+                $slug = $originalSlug . '-' . $i++;
+            }
+
+            // ================= CREATE TOURISM =================
+            $tourismPlace = TourismPlace::create([
+                'user_id'      => auth()->id(),
+                'category_id'  => $request->category_id,
+                'location_id'  => $location->id,
+                'name'         => $request->name,
+                'slug'         => $slug,
+                'description'  => $request->description,
+                'ticket_price' => $request->ticket_price,
+                'open_time'    => $request->open_time,
+                'close_time'   => $request->close_time,
+                'contact'      => $request->contact,
+                'cover_image'  => $coverPath,
+                'is_active'    => false,
+                'is_verified'  => false,
+            ]);
+
+            // ================= FASILITAS =================
+            if (!empty($request->facilities)) {
+                $tourismPlace->facilities()->sync($request->facilities);
+            }
+
+            // ================= GALERI =================
+            if ($request->has('gallery') && is_array($request->gallery)) {
+
+                foreach ($request->gallery as $item) {
+
+                    if (
+                        isset($item['image']) &&
+                        $item['image'] instanceof \Illuminate\Http\UploadedFile &&
+                        $item['image']->isValid()
+                    ) {
+                        $upload = $cloudinary->uploadApi()->upload(
+                            $item['image']->getRealPath(),
+                            ['folder' => 'tourism_places/gallery']
                         );
-                        $coverPath = $uploadedCover['secure_url'];
-                    }
-                }
-
-                // ================= GENERATE UNIQUE SLUG =================
-                $slug = Str::slug($request->name);
-                $originalSlug = $slug;
-                $count = 1;
-                while (TourismPlace::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $count++;
-                }
-
-                // ================= CREATE TOURISM PLACE =================
-                $tourismPlace = TourismPlace::create([
-                    'user_id'      => auth()->id(),
-                    'category_id'  => $request->category_id,
-                    'location_id'  => $location->id,
-                    'name'         => $request->name,
-                    'slug'         => $slug,
-                    'description'  => $request->description,
-                    'ticket_price' => $request->ticket_price,
-                    'open_time'    => $request->open_time,
-                    'close_time'   => $request->close_time,
-                    'contact'      => $request->contact,
-                    'cover_image'  => $coverPath,
-                    'is_active'    => false, // tetap menunggu aktivasi
-                    'is_verified'  => false, // tetap menunggu verifikasi
-                ]);
-
-                // ================= SIMPAN FASILITAS =================
-                if ($request->filled('facilities')) {
-                    $tourismPlace->facilities()->sync($request->facilities);
-                }
-
-                // ================= UPLOAD GALERI =================
-                foreach ($request->file('gallery.*.image', []) as $index => $file) {
-                    if ($file instanceof \Illuminate\Http\UploadedFile && file_exists($file->getRealPath())) {
-                        $title = $request->gallery[$index]['title'] ?? null;
-
-                        $uploadedGallery = $cloudinary->uploadApi()->upload(
-                            $file->getRealPath(),
-                            [
-                                'folder' => 'tourism_places/gallery',
-                                'overwrite' => true,
-                            ]
-                        );
-                        $galleryPath = $uploadedGallery['secure_url'];
 
                         $tourismPlace->galleries()->create([
-                            'image' => $galleryPath,
-                            'title' => $title,
+                            'image' => $upload['secure_url'] ?? null,
+                            'title' => $item['title'] ?? null,
                         ]);
                     }
                 }
+            }
 
-                return redirect()
-                    ->route('dashboard')
-                    ->with('success', 'Tempat wisata berhasil ditambahkan dan menunggu verifikasi admin.');
-            });
+            DB::commit();
+
+            return back()->with('success', 'Data wisata berhasil disimpan! Menunggu verifikasi admin.');
         } catch (\Exception $e) {
-            Log::error("Error menyimpan tempat wisata: " . $e->getMessage(), [
-                'user_id' => auth()->id(),
-                'request' => $request->all()
+
+            DB::rollBack();
+
+            Log::error("Error simpan wisata", [
+                'error' => $e->getMessage(),
+                'line'  => $e->getLine(),
+                'file'  => $e->getFile(),
+                'user'  => auth()->id()
             ]);
 
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan saat menyimpan tempat wisata: ' . $e->getMessage());
+                ->with('error', $e->getMessage()); // 🔥 tampilkan error asli
         }
     }
-
 
     public function show($slug)
     {

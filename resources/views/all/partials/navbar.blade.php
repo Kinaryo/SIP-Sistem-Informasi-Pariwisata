@@ -1,4 +1,8 @@
 <style>
+    .navbar {
+        z-index: 9999;
+    }
+
     .nav-pill {
         padding: 4px 8px;
         border-radius: 5px;
@@ -16,17 +20,48 @@
         color: #fff !important;
         box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
     }
+
+    .custom-dropdown {
+        position: relative;
+    }
+
+    .custom-menu {
+        position: absolute;
+        top: 110%;
+        right: 0;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        min-width: 160px;
+        display: none;
+        z-index: 9999;
+    }
+
+    .custom-menu.show {
+        display: block;
+    }
+
+    .custom-menu button {
+        width: 100%;
+        border: none;
+        background: none;
+        padding: 10px 12px;
+        text-align: left;
+    }
+
+    .custom-menu button:hover {
+        background: #f1f1f1;
+    }
 </style>
 
 @php
-    $isDashboard = request()->is('dashboard*') || 
-                   request()->is('admin*') || 
-                   request()->routeIs('admin.*') || 
-                   request()->routeIs('dashboard*');
+    $isDashboard = request()->is('dashboard*') 
+        || request()->is('admin*');
 @endphp
 
 <nav class="navbar navbar-expand-lg fixed-top navbar-blur shadow-sm">
     <div class="container">
+
         <a class="navbar-brand fw-bold" href="/">
             <i class="fas fa-map-marked-alt text-primary me-1"></i>
             Visit<span class="text-primary">MERAUKE</span>
@@ -39,35 +74,38 @@
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav ms-auto align-items-center gap-2 fw-medium">
 
+                {{-- BERANDA --}}
                 <li class="nav-item">
                     <a class="nav-link nav-pill {{ request()->is('/') ? 'active' : '' }}" href="/">
                         Beranda
                     </a>
                 </li>
 
+                {{-- WISATA --}}
                 <li class="nav-item">
-                    <a class="nav-link nav-pill {{ (request()->routeIs('wisata*') && !$isDashboard) ? 'active' : '' }}"
+                    <a class="nav-link nav-pill {{ request()->is('wisata*') ? 'active' : '' }}"
                         href="{{ route('wisata') }}">
                         Wisata
                     </a>
                 </li>
 
+                {{-- PRODUK --}}
                 <li class="nav-item">
-                    <a class="nav-link nav-pill 
-                        {{ (request()->routeIs('produk*') && !$isDashboard) ? 'active' : '' }}"
+                    <a class="nav-link nav-pill {{ request()->is('produk*') ? 'active' : '' }}"
                         href="{{ route('produk.index') }}">
                         Produk
                     </a>
                 </li>
 
+                {{-- ARTIKEL --}}
                 <li class="nav-item">
-                    <a class="nav-link nav-pill 
-                        {{ (request()->routeIs('artikel*') && !$isDashboard) ? 'active' : '' }}"
+                    <a class="nav-link nav-pill {{ request()->is('artikel*') ? 'active' : '' }}"
                         href="{{ route('artikel.index') }}">
                         Artikel
                     </a>
                 </li>
 
+                {{-- TENTANG --}}
                 <li class="nav-item">
                     <a class="nav-link nav-pill {{ request()->routeIs('tentang.kami') ? 'active' : '' }}"
                         href="{{ route('tentang.kami') }}">
@@ -75,6 +113,7 @@
                     </a>
                 </li>
 
+                {{-- KONTAK --}}
                 <li class="nav-item">
                     <a class="nav-link nav-pill {{ request()->routeIs('kontak.kami') ? 'active' : '' }}"
                         href="{{ route('kontak.kami') }}">
@@ -82,13 +121,15 @@
                     </a>
                 </li>
 
+                {{-- QUIZ --}}
                 <li class="nav-item">
-                    <a class="nav-link nav-pill {{ (request()->routeIs('quiz*') && !$isDashboard) ? 'active' : '' }}"
+                    <a class="nav-link nav-pill {{ request()->is('quiz*') ? 'active' : '' }}"
                         href="{{ route('quiz.index') }}">
                         Quiz
                     </a>
                 </li>
 
+                {{-- GUEST --}}
                 @guest
                     <li class="nav-item ms-2">
                         <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm nav-pill px-3">
@@ -97,6 +138,7 @@
                     </li>
                 @endguest
 
+                {{-- AUTH --}}
                 @auth
                     @php
                         $role = auth()->user()->role;
@@ -112,20 +154,20 @@
                         </a>
                     </li>
 
-                    <li class="nav-item dropdown ms-2">
-                        <a class="btn btn-primary btn-sm nav-pill px-3 dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                    <li class="nav-item custom-dropdown ms-2">
+                        <button onclick="toggleDropdown()" class="btn btn-primary btn-sm nav-pill px-3">
                             <i class="fas fa-user me-1"></i>
                             {{ auth()->user()->name }}
-                        </a>
+                        </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <li>
-                                <a class="dropdown-item text-danger" href="#"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <div id="dropdownMenu" class="custom-menu">
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="text-danger">
                                     <i class="fas fa-sign-out-alt me-1"></i> Logout
-                                </a>
-                            </li>
-                        </ul>
+                                </button>
+                            </form>
+                        </div>
                     </li>
                 @endauth
 
@@ -134,6 +176,15 @@
     </div>
 </nav>
 
-<form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-    @csrf
-</form>
+<script>
+function toggleDropdown() {
+    document.getElementById('dropdownMenu').classList.toggle('show');
+}
+
+document.addEventListener('click', function(event) {
+    let dropdown = document.querySelector('.custom-dropdown');
+    if (!dropdown.contains(event.target)) {
+        document.getElementById('dropdownMenu').classList.remove('show');
+    }
+});
+</script>

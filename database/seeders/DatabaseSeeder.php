@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             // GallerySeeder::class,
             // ReviewSeeder::class,
             // FavoriteSeeder::class,
-            // VisitSeeder::class,
+            VisitSeeder::class,
             // EventSeeder::class,
             // EventRegistrationSeeder::class,
             // ProdukSeeder::class,

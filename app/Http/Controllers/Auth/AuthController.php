@@ -10,80 +10,98 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    /* =====================
-        FORM LOGIN
-    ====================== */
     public function loginForm()
     {
         return view('auth.login');
     }
 
-    /* =====================
-        PROSES LOGIN
-    ====================== */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email'    => 'required|email',
+        $request->merge([
+            'email' => strtolower(trim($request->email))
+        ]);
+
+        $request->validate([
+            'email'    => 'required|email:rfc,dns',
             'password' => 'required'
         ], [
-            'email.required' => 'Email wajib diisi',
-            'email.email'    => 'Format email tidak valid',
+            'email.required'    => 'Email wajib diisi',
+            'email.email'       => 'Format email tidak valid',
             'password.required' => 'Password wajib diisi',
         ]);
+
+        $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            /** @var \App\Models\User $user */
             $user = Auth::user();
 
             if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.dashboard')
+                    ->with('success', 'Login berhasil sebagai admin');
             }
 
-            return redirect()->route('landing');
+            return redirect()->route('landing')
+                ->with('success', 'Selamat datang ' . $user->name);
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ]);
+        return back()
+            ->withErrors([
+                'email' => 'Email atau password salah'
+            ])
+            ->withInput();
     }
 
-    /* =====================
-        FORM REGISTER
-    ====================== */
     public function registerForm()
     {
         return view('auth.register');
     }
 
-    /* =====================
-        PROSES REGISTER
-    ====================== */
     public function register(Request $request)
     {
-        $data = $request->validate([
+        $request->merge([
+            'email' => strtolower(trim($request->email))
+        ]);
+
+        $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
+            'email'    => 'required|email:rfc,dns|unique:users,email',
             'address'  => 'required|string',
+            'password' => [
+                'required',
+                'min:6',
+                'confirmed',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[@$!%*?&^#()_\-+=]/',
+            ],
+        ], [
+            'name.required'      => 'Nama wajib diisi',
+            'name.max'           => 'Nama maksimal 100 karakter',
+            'email.required'     => 'Email wajib diisi',
+            'email.email'        => 'Format email tidak valid',
+            'email.unique'       => 'Email sudah terdaftar',
+            'address.required'   => 'Alamat wajib diisi',
+            'password.required'  => 'Password wajib diisi',
+            'password.min'       => 'Password minimal 6 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
+            'password.regex'     => 'Password harus mengandung huruf besar, huruf kecil, angka, dan simbol',
         ]);
 
         User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'address'  => $data['address'],
-            'password' => Hash::make($data['password']),
+            'name'     => trim($request->name),
+            'email'    => trim($request->email),
+            'address'  => $request->address,
+            'password' => Hash::make($request->password),
             'role'     => 'user',
         ]);
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil.');
+        return redirect()->route('login')
+            ->with('success', 'Registrasi berhasil, silakan login');
     }
 
-    /* =====================
-        LOGOUT
-    ====================== */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -91,6 +109,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('landing');
+        return redirect()->route('landing')
+            ->with('success', 'Berhasil logout');
     }
 }

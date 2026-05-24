@@ -1,22 +1,20 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Visit extends Model
 {
-    use HasFactory;
+    public $timestamps = false;
 
     protected $fillable = [
-        'tourism_place_id',
-        'visitor_count',
-        'visit_date'
+        'user_id',
+        'session_id',
+        'ip_address',
+        'user_agent',
+        'path',
+        'method',
+        'referer',
+        'visited_at',
     ];
-
-    public function tourismPlace()
-    {
-        return $this->belongsTo(TourismPlace::class);
-    }
 }

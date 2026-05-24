@@ -139,7 +139,7 @@ class ArtikelController extends Controller
             ->withQueryString();
 
         if ($request->ajax()) {
-            return view('user.artikel.partials.list', compact('artikels'))->render();
+            return view('all.artikel.partials.list', compact('artikels'))->render();
         }
 
         return view('all.artikel.index', compact('artikels'));
