@@ -259,7 +259,11 @@
                                 {{-- PESAWAT --}}
                                 <a href="https://www.traveloka.com/id-id/flight" target="_blank"
                                     class="btn btn-primary w-100 rounded-pill">
-                                    Tiket dari {{ $userCity }} ke {{ $tourism_place->location->city }}
+
+                                    {{ $userCity
+        ? "Tiket dari {$userCity} ke {$tourism_place->location->city}"
+        : "Cari Tiket Pesawat" }}
+
                                 </a>
                             </div>
 
@@ -303,66 +307,66 @@
 
     @push('scripts')
 
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
 
-                    @if ($tourism_place->location?->latitude && $tourism_place->location?->longitude)
+                @if ($tourism_place->location?->latitude && $tourism_place->location?->longitude)
 
-                                const lat = {{ $tourism_place->location->latitude }};
-                                const lng = {{ $tourism_place->location->longitude }};
+                    const lat = {{ $tourism_place->location->latitude }};
+                    const lng = {{ $tourism_place->location->longitude }};
 
-                                const map = L.map('map', {
-                                    center: [lat, lng],
-                                    zoom: 15
-                                });
+                    const map = L.map('map', {
+                        center: [lat, lng],
+                        zoom: 15
+                    });
 
-                                const osm = L.tileLayer(
-                                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                    { attribution: '&copy; OpenStreetMap' }
-                                );
+                    const osm = L.tileLayer(
+                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        { attribution: '&copy; OpenStreetMap' }
+                    );
 
-                                const googleStreet = L.tileLayer(
-                                    'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-                                    { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
-                                );
+                    const googleStreet = L.tileLayer(
+                        'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                        { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
+                    );
 
-                                const googleSat = L.tileLayer(
-                                    'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-                                    { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
-                                );
+                    const googleSat = L.tileLayer(
+                        'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                        { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
+                    );
 
-                                const googleHybrid = L.tileLayer(
-                                    'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-                                    { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
-                                );
+                    const googleHybrid = L.tileLayer(
+                        'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+                        { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }
+                    );
 
-                                googleHybrid.addTo(map);
+                    googleHybrid.addTo(map);
 
-                                L.control.layers({
-                                    "OpenStreetMap": osm,
-                                    "Google Street": googleStreet,
-                                    "Satellite": googleSat,
-                                    "Hybrid": googleHybrid
-                                }).addTo(map);
+                    L.control.layers({
+                        "OpenStreetMap": osm,
+                        "Google Street": googleStreet,
+                        "Satellite": googleSat,
+                        "Hybrid": googleHybrid
+                    }).addTo(map);
 
-                                const marker = L.marker([lat, lng]).addTo(map);
+                    const marker = L.marker([lat, lng]).addTo(map);
 
-                                marker.bindPopup(`
-                            <b>{{ $tourism_place->name }}</b><br>
-                            {{ $tourism_place->location->address ?? '' }}
-                        `).openPopup();
+                    marker.bindPopup(`
+                                    <b>{{ $tourism_place->name }}</b><br>
+                                    {{ $tourism_place->location->address ?? '' }}
+                                `).openPopup();
 
-                    @endif
+                @endif
 
-        });
+            });
 
-                function previewImage(src) {
-                    document.getElementById('imagePreview').src = src;
-                    new bootstrap.Modal(document.getElementById('imagePreviewModal')).show();
-                }
-            </script>
+            function previewImage(src) {
+                document.getElementById('imagePreview').src = src;
+                new bootstrap.Modal(document.getElementById('imagePreviewModal')).show();
+            }
+        </script>
 
     @endpush

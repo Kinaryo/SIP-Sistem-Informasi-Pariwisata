@@ -1,14 +1,14 @@
 <footer id="kontak" class="bg-dark text-white pt-5 pb-4">
     <div class="container">
-        <div class="row gy-4">
+        <div class="row gy-4 ">
 
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <h4 class="fw-bold">
                     <i class="fas fa-map-marked-alt text-primary"></i>
                     Visit<span class="text-primary">MERAUKE</span>
                 </h4>
 
-                <p class="text-secondary small" style="text-align: justify">
+                <p class="text-secondary small col-md-9" style="text-align: justify">
                     VisitMerauke.com adalah platform informasi digital yang menyajikan berbagai informasi
                     tentang Merauke, mulai dari destinasi wisata, budaya, produk lokal dalam satu tempat.
                 </p>
@@ -19,7 +19,6 @@
 
                 <ul class="list-unstyled small mt-3">
                     <li><a href="/tentang-kami" class="text-secondary text-decoration-none">Tentang Kami</a></li>
-                    <li><a href="/kontak-kami" class="text-secondary text-decoration-none">Kontak Kami</a></li>
                     <li><a href="{{ route('privacy') }}" class="text-secondary text-decoration-none">Privacy Policy</a>
                     </li>
                     <li><a href="{{ route('terms') }}" class="text-secondary text-decoration-none">Terms &
@@ -48,7 +47,6 @@
                 </div>
             </div>
 
-            <!-- VISITOR (AJAX READY) -->
             <div class="col-md-2">
                 <h6 class="fw-bold">Visitors</h6>
 
@@ -69,26 +67,6 @@
                         <strong class="text-warning" id="visitors_total">0</strong>
                     </div>
 
-                </div>
-            </div>
-
-            <div class="col-md-2">
-                <h6 class="fw-bold">Media Sosial</h6>
-
-                <div class="mt-3">
-                    <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-
-                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-
-                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
                 </div>
             </div>
 

@@ -12,6 +12,7 @@ use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 
 class LandingPageController extends Controller
 {
@@ -172,30 +173,55 @@ class LandingPageController extends Controller
             ->where('is_verified', true)
             ->firstOrFail();
 
-        $userCity = 'Merauke';
-        $userProvince = 'Papua Selatan';
+        $userCity = null;
+        $userProvince = null;
 
         try {
-            if (function_exists('geoip')) {
-                $ip = request()->ip();
 
-                if (!in_array($ip, ['127.0.0.1', '::1'])) {
-                    $geo = Cache::remember('geoip_' . $ip, 3600, function () use ($ip) {
-                        return geoip($ip);
-                    });
+            $ip = request()->ip();
 
-                    if ($geo) {
-                        if (is_array($geo)) {
-                            $userCity = $geo['city'] ?? $userCity;
-                            $userProvince = $geo['state'] ?? $userProvince;
-                        } elseif (is_object($geo)) {
-                            $userCity = $geo->city ?? $userCity;
-                            $userProvince = $geo->state ?? $userProvince;
+            if (!in_array($ip, ['127.0.0.1', '::1'])) {
+
+                $geo = Cache::remember(
+                    'geo_location_' . md5($ip),
+                    now()->addDay(),
+                    function () use ($ip) {
+
+                        $response = Http::timeout(5)
+                            ->get("http://ip-api.com/json/{$ip}");
+
+                        if (!$response->successful()) {
+                            return null;
                         }
+
+                        $data = $response->json();
+
+                        if (($data['status'] ?? null) !== 'success') {
+                            return null;
+                        }
+
+                        return $data;
+                    }
+                );
+
+                if ($geo) {
+
+                    $userCity = !empty($geo['city'])
+                        ? $geo['city']
+                        : null;
+
+                    $userProvince = !empty($geo['regionName'])
+                        ? $geo['regionName']
+                        : null;
+
+                    // fallback jika kota kosong
+                    if (!$userCity && $userProvince) {
+                        $userCity = $userProvince;
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            report($e);
         }
 
         $estimasiTiket = rand(1200000, 3500000);
@@ -207,27 +233,26 @@ class LandingPageController extends Controller
             'estimasiTiket'
         ));
     }
+    public function footerStats()
+    {
+        $access = SiteAccessCount::first();
 
-   public function footerStats()
-{
-    $access = SiteAccessCount::first();
+        if (!$access) {
+            $access = SiteAccessCount::create([
+                'total_access' => 0
+            ]);
+        }
 
-    if (!$access) {
-        $access = SiteAccessCount::create([
-            'total_access' => 0
+        $todayVisits = Visit::whereDate('visited_at', Carbon::today())->count();
+
+        $monthlyVisits = Visit::whereMonth('visited_at', Carbon::now()->month)
+            ->whereYear('visited_at', Carbon::now()->year)
+            ->count();
+
+        return response()->json([
+            'visitors_today' => $todayVisits,
+            'visitors_month' => $monthlyVisits,
+            'visitors' => $access->total_access + Visit::count(),
         ]);
     }
-
-    $todayVisits = Visit::whereDate('visited_at', Carbon::today())->count();
-
-    $monthlyVisits = Visit::whereMonth('visited_at', Carbon::now()->month)
-        ->whereYear('visited_at', Carbon::now()->year)
-        ->count();
-
-    return response()->json([
-        'visitors_today' => $todayVisits,
-        'visitors_month' => $monthlyVisits,
-        'visitors' => $access->total_access + Visit::count(),
-    ]);
-}
 }
